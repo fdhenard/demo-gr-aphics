@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [java-time :as time]
-            [clojure.spec.alpha :as spec]))
+            [clojure.spec.alpha :as spec]
+            [clojure.pprint :as pprint]))
 
 (defn will-coerce-to-local-date? [x]
   (try
@@ -95,14 +96,14 @@
                         :f "Female"})
 
 
-(defn doit []
-  (let [file-thingy (slurp "initial-file-test.csv")
-        lines (clojure.string/split file-thingy #"\n")
-        ;; val-vecs (map #(clojure.string/split % #"\ \|\ ") lines)
+(defn process-file [filepath delimiter-name]
+  (let [file-as-str (slurp filepath)
+        lines (clojure.string/split file-as-str #"\n")
+        delimiter-regex (get delimiter-regexes (keyword delimiter-name))
         val-maps (as-> lines $
                    (map
                     #(-> %
-                         (line-to-map (:pipe delimiter-regexes))
+                         (line-to-map delimiter-regex)
                          :result)
                     $)
                    (remove nil? $))
@@ -115,8 +116,6 @@
                         (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))
                         (clojure.walk/stringify-keys $))
                      sorted)
-        _ (clojure.pprint/print-table displayable)
+        _ (pprint/print-table displayable)
         ]
-    nil
-    ;; sorted
-    ))
+    nil))
