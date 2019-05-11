@@ -8,6 +8,7 @@
                  [org.clojure/tools.cli "0.4.2"]
                  [ring/ring-core "1.6.3"]
                  [ring/ring-jetty-adapter "1.6.3"]
-                 [mount "0.1.16"]]
+                 [mount "0.1.16"]
+                 [metosin/reitit-ring "0.3.1"]]
   :repl-options {:init-ns demo-gr-aphics.core}
   :main demo-gr-aphics.cli)
