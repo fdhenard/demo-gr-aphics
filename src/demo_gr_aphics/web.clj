@@ -36,15 +36,17 @@
           {:status 201
            :body {:success true}})))))
 
+(defn get-demog-recs-sorted [sort-by-key-fn request]
+  (let [sorted (sort-by sort-by-key-fn @demog-recs)]
+    {:status 200
+     :result (map core/rec->displayable sorted)}))
+
 (def router
   (ring/router
-   [["/" {:get (fn [req] {:status 200
-                          :headers {"Content-Type" "text/html"}
-                          :body "Hello World"})}]
-    ["/ping" {:get (fn [req] {:status 200
-                              :headers {"Content-Type" "text/html"}
-                              :body "Pong"})}]
-    ["/records" {:post {:handler post-demog-rec!}}]]))
+   [["/records" {:post {:handler post-demog-rec!}}]
+    ["/records/gender" {:get {:handler (partial get-demog-recs-sorted :gender)}}]
+    ["/records/birthdate" {:get {:handler (partial get-demog-recs-sorted :birthdate)}}]
+    ["/records/name" {:get {:handler (partial get-demog-recs-sorted (juxt :last-name :first-name))}}]]))
 
 (def app (ring/ring-handler
           router

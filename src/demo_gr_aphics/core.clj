@@ -107,9 +107,12 @@
                         :f "Female"})
 
 (defn rec->displayable [demog-rec]
+  (assoc demog-rec :birthdate (time/format "M/d/YYYY" (:birthdate demog-rec))))
+
+(defn rec->displayable-for-cli [demog-rec]
   (as-> demog-rec $
+    (rec->displayable $)
     (assoc $ :gender (get gender-to-display (:gender $)))
-    (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))
     (clojure.walk/stringify-keys $)))
 
 
@@ -143,11 +146,11 @@
                             (map #(:result %)))
             ;; _ (pprint/pprint demog-recs)
             sorted-by-gender-lname (sort-by (juxt :gender :last-name) demog-recs)
-            display-sorted-gender-lname (map rec->displayable sorted-by-gender-lname)
+            display-sorted-gender-lname (map rec->displayable-for-cli sorted-by-gender-lname)
             sorted-by-dob (sort-by :birthdate demog-recs)
-            display-sorted-dob (map rec->displayable sorted-by-dob)
+            display-sorted-dob (map rec->displayable-for-cli sorted-by-dob)
             sorted-by-lname-desc (sort-by :last-name #(compare %2 %1) demog-recs)
-            display-sorted-lname-desc (map rec->displayable sorted-by-lname-desc)
+            display-sorted-lname-desc (map rec->displayable-for-cli sorted-by-lname-desc)
             _ (println "\n\nOutput 1 – sorted by gender (females before males) then by last name ascending")
             _ (pprint/print-table display-sorted-gender-lname)
             _ (println "\n\nOutput 2 – sorted by birth date, ascending")
