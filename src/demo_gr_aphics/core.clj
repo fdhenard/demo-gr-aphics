@@ -17,6 +17,9 @@
           false
           (throw ei))))))
 
+(defn is-date-lte-today? [x]
+  (<= (compare (time/local-date x) (time/local-date)) 0))
+
 (spec/def ::non-blank-string (spec/and string? #(not (str/blank? %))))
 (spec/def ::last-name ::non-blank-string)
 (spec/def ::first-name ::non-blank-string)
@@ -34,8 +37,10 @@
         []
         (keys gender-options-map))))
 (spec/def ::gender gender-options)
-(spec/def ::date-string (spec/and ::non-blank-string will-coerce-to-local-date?))
-(spec/def ::birthdate ::date-string)
+(spec/def ::birthdate (spec/and
+                       ::non-blank-string
+                       will-coerce-to-local-date?
+                       is-date-lte-today?))
 (spec/def ::rainbow-colors #{"red"
                              "orange"
                              "yellow"
@@ -66,7 +71,8 @@
       ;;                 {:spec-explain-data spec-explain-data
       ;;                  :spec-explain-str spec-explain-str}))
       {:error {:spec-explain-data spec-explain-data
-               :spec-explain-str spec-explain-str}
+               :spec-explain-str spec-explain-str
+               :line line}
        :result nil}
       {:result {:last-name lname
                 :first-name fname
@@ -95,27 +101,45 @@
 (def gender-to-display {:m "Male"
                         :f "Female"})
 
+(defn rec->displayable [demog-rec]
+  (as-> demog-rec $
+    (assoc $ :gender (get gender-to-display (:gender $)))
+    (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))
+    (clojure.walk/stringify-keys $)))
 
-(defn process-file [filepath delimiter-name]
-  (let [file-as-str (slurp filepath)
-        lines (clojure.string/split file-as-str #"\n")
-        delimiter-regex (get delimiter-regexes (keyword delimiter-name))
-        val-maps (as-> lines $
-                   (map
-                    #(-> %
-                         (line-to-map delimiter-regex)
-                         :result)
-                    $)
-                   (remove nil? $))
-        ;; sorted (sort-by (juxt :gender :last-name) val-maps)
-        ;; sorted (sort-by :birthdate val-maps)
-        sorted (sort-by :last-name #(compare %2 %1) val-maps)
-        displayable (map
-                     #(as-> % $
-                        (assoc $ :gender (get gender-to-display (:gender $)))
-                        (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))
-                        (clojure.walk/stringify-keys $))
-                     sorted)
-        _ (pprint/print-table displayable)
-        ]
-    nil))
+
+(defn process-file! [filepath delimiter-name]
+  (let [file (io/as-file filepath)]
+    (if (not (.exists file))
+      (println (str "file './" filepath "' does not exist"))
+      (let [file-as-str (slurp file)
+            lines (clojure.string/split file-as-str #"\n")
+            delimiter-regex (get delimiter-regexes (keyword delimiter-name))
+            xform-results (as-> lines $
+                            (map #(line-to-map % delimiter-regex) $)
+                            (group-by #(if (nil? (:result %)) :error :result) $))
+            ;; _ (pprint/pprint xform-results)
+            errored-lines (->> (:error xform-results)
+                         (map #(:error %)))
+            ;; _ (pprint/pprint errored-lines)
+            _ (println "\nerrors:")
+            _ (doseq [errd-line errored-lines]
+                (println (str "error for line \"" (:line errd-line) "\""))
+                (println (str (:spec-explain-str errd-line) "\n")))
+            demog-recs (->> (:result xform-results)
+                            (map #(:result %)))
+            ;; _ (pprint/pprint demog-recs)
+            sorted-by-gender-lname (sort-by (juxt :gender :last-name) demog-recs)
+            display-sorted-gender-lname (map rec->displayable sorted-by-gender-lname)
+            sorted-by-dob (sort-by :birthdate demog-recs)
+            display-sorted-dob (map rec->displayable sorted-by-dob)
+            sorted-by-lname-desc (sort-by :last-name #(compare %2 %1) demog-recs)
+            display-sorted-lname-desc (map rec->displayable sorted-by-lname-desc)
+            _ (println "\n\nOutput 1 – sorted by gender (females before males) then by last name ascending")
+            _ (pprint/print-table display-sorted-gender-lname)
+            _ (println "\n\nOutput 2 – sorted by birth date, ascending")
+            _ (pprint/print-table display-sorted-dob)
+            _ (println "\n\nOutput 3 - sorted by last name, descending")
+            _ (pprint/print-table display-sorted-lname-desc)
+            ]
+        nil))))

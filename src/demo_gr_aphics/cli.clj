@@ -7,7 +7,7 @@
 (defn usage [options-summary]
   (->> ["demo-gr-aphics file processing"
         ""
-        "Usage: demo-gr-aphics filepath delimiter"
+        "Usage: lein run!!!change!!! filepath delimiter"
         ""
         "Delimiter options:"
         "  pipe  ' | '"
@@ -38,4 +38,4 @@
   (let [{:keys [filepath delimiter exit-message ok?]} (validate-args args)]
     (if exit-message
       (println exit-message)
-      (demo-gr-aphics.core/process-file filepath delimiter))))
+      (demo-gr-aphics.core/process-file! filepath delimiter))))
