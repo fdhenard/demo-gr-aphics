@@ -56,7 +56,7 @@
                         :space #"\ "})
 
 
-(defn line->map [line line-num delimiter-re]
+(defn line->map [line delimiter-re]
   (let [[lname fname gender fav-color dob] (str/split line delimiter-re)
         demographic-record {:last-name lname
                             :first-name fname
@@ -69,8 +69,7 @@
     (if (not (nil? spec-explain-data))
       {:error {:spec-explain-data spec-explain-data
                :spec-explain-str spec-explain-str
-               :line line
-               :line-num line-num}
+               :line line}
        :result nil}
       {:result {:last-name lname
                 :first-name fname
@@ -116,12 +115,16 @@
             xform-results (as-> lines $
                             (map-indexed
                              (fn [idx line]
-                               (line->map line (inc idx) delimiter-regex))
+                               (-> line
+                                   (line->map delimiter-regex)
+                                   (assoc :line-num (inc idx))))
                              $)
                             (group-by #(if (nil? (:result %)) :error :result) $))
             ;; _ (pprint/pprint xform-results)
             errored-lines (->> (:error xform-results)
-                         (map #(:error %)))
+                               (map #(-> %
+                                         :error
+                                         (assoc :line-num (:line-num %)))))
             ;; _ (pprint/pprint errored-lines)
             _ (println "\nerrors:\n")
             _ (doseq [errd-line errored-lines]
