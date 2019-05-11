@@ -1,18 +1,31 @@
 (ns demo-gr-aphics.cli
   (:require [clojure.tools.cli :as cli]
             [clojure.string :as str]
-            [demo-gr-aphics.core])
+            [demo-gr-aphics.core]
+            [mount.core :as mount]
+            [demo-gr-aphics.web ])
   (:gen-class))
 
 (defn usage [options-summary]
-  (->> ["demo-gr-aphics file processing"
+  (->> [""
+        "demo-gr-aphics line processing - web or file"
         ""
-        "Usage: lein run!!!change!!! filepath delimiter"
+        "Usage:"
+        ""
+        ""
+        "For file processing: "
+        "$ lein run!!!change!!! filepath delimiter"
         ""
         "Delimiter options:"
         "  pipe  ' | '"
         "  comma ', '"
         "  space ' '"
+        ""
+        ""
+        "For webserver: "
+        "$ lein run !!!!change!!! runserver"
+        ""
+        "  then navigate to http://localhost:3000"
         ""]
        (str/join \newline)))
 
@@ -31,11 +44,19 @@
       (and (= 2 (count arguments))
            (#{"pipe" "comma" "space"} (nth arguments 1)))
       {:filepath (first arguments) :delimiter (nth arguments 1)}
+      (and (= 1 (count arguments))
+           (= "runserver" (nth arguments 0)))
+      {:webserver? true}
       :else ; failed custom validation => exit with usage summary
       {:exit-message (usage summary)})))
 
 (defn -main [& args]
-  (let [{:keys [filepath delimiter exit-message ok?]} (validate-args args)]
-    (if exit-message
+  (let [{:keys [filepath delimiter webserver? exit-message ok?]} (validate-args args)]
+    (cond
+      exit-message
       (println exit-message)
+      webserver?
+      (-> (mount/only #{#'demo-gr-aphics.web/webserver})
+          mount/start)
+      :else
       (demo-gr-aphics.core/process-file! filepath delimiter))))
