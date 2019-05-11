@@ -56,7 +56,7 @@
                         :space #"\ "})
 
 
-(defn line-to-map [line delimiter-re]
+(defn line->map [line line-num delimiter-re]
   (let [[lname fname gender fav-color dob] (str/split line delimiter-re)
         demographic-record {:last-name lname
                             :first-name fname
@@ -67,12 +67,10 @@
         spec-explain-str (spec/explain-str ::demographic-record demographic-record)
         ]
     (if (not (nil? spec-explain-data))
-      ;; (throw (ex-info "invalid demographic record"
-      ;;                 {:spec-explain-data spec-explain-data
-      ;;                  :spec-explain-str spec-explain-str}))
       {:error {:spec-explain-data spec-explain-data
                :spec-explain-str spec-explain-str
-               :line line}
+               :line line
+               :line-num line-num}
        :result nil}
       {:result {:last-name lname
                 :first-name fname
@@ -116,15 +114,19 @@
             lines (clojure.string/split file-as-str #"\n")
             delimiter-regex (get delimiter-regexes (keyword delimiter-name))
             xform-results (as-> lines $
-                            (map #(line-to-map % delimiter-regex) $)
+                            (map-indexed
+                             (fn [idx line]
+                               (line->map line (inc idx) delimiter-regex))
+                             $)
                             (group-by #(if (nil? (:result %)) :error :result) $))
             ;; _ (pprint/pprint xform-results)
             errored-lines (->> (:error xform-results)
                          (map #(:error %)))
             ;; _ (pprint/pprint errored-lines)
-            _ (println "\nerrors:")
+            _ (println "\nerrors:\n")
             _ (doseq [errd-line errored-lines]
-                (println (str "error for line \"" (:line errd-line) "\""))
+                (println (str "error for line number " (:line-num errd-line)
+                              ", line: \"" (:line errd-line) "\""))
                 (println (str (:spec-explain-str errd-line) "\n")))
             demog-recs (->> (:result xform-results)
                             (map #(:result %)))

@@ -12,6 +12,7 @@ FIXME
 - all records can be loaded into memory
 - file extension describes the delimiter format
 - any problems with the records will be rejected
+- only 2 genders (state why - referenced in instructions!!!!!)
 
 ## License
 
