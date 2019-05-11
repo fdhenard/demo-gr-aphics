@@ -9,6 +9,8 @@
                  [ring/ring-core "1.6.3"]
                  [ring/ring-jetty-adapter "1.6.3"]
                  [mount "0.1.16"]
-                 [metosin/reitit-ring "0.3.1"]]
+                 [metosin/reitit "0.3.1"]
+                 [metosin/reitit-ring "0.3.1"]
+                 [expound "0.7.2"]]
   :repl-options {:init-ns demo-gr-aphics.core}
   :main demo-gr-aphics.cli)

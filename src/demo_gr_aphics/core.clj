@@ -54,6 +54,10 @@
 (def delimiter-regexes {:pipe #"\ \|\ "
                         :comma #",\ "
                         :space #"\ "})
+(def delimiter-choices (->> delimiter-regexes
+                            keys
+                            (map name)
+                            set))
 
 
 (defn line->map [line delimiter-re]

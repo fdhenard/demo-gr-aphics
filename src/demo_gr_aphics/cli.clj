@@ -1,7 +1,7 @@
 (ns demo-gr-aphics.cli
   (:require [clojure.tools.cli :as cli]
             [clojure.string :as str]
-            [demo-gr-aphics.core]
+            [demo-gr-aphics.core :as core]
             [mount.core :as mount]
             [demo-gr-aphics.web ])
   (:gen-class))
@@ -42,7 +42,7 @@
       {:exit-message (error-msg errors)}
       ;; custom validation on arguments
       (and (= 2 (count arguments))
-           (#{"pipe" "comma" "space"} (nth arguments 1)))
+           (core/delimiter-choices (nth arguments 1)))
       {:filepath (first arguments) :delimiter (nth arguments 1)}
       (and (= 1 (count arguments))
            (= "runserver" (nth arguments 0)))
@@ -59,4 +59,4 @@
       (-> (mount/only #{#'demo-gr-aphics.web/webserver})
           mount/start)
       :else
-      (demo-gr-aphics.core/process-file! filepath delimiter))))
+      (core/process-file! filepath delimiter))))
