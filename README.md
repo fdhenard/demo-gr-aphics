@@ -13,6 +13,7 @@ FIXME
 - file extension describes the delimiter format
 - any problems with the records will be rejected
 - only 2 genders (state why - referenced in instructions!!!!!)
+- input date must coerce to java-time/local-date - recommend 'YYYY-MM-DD'
 
 ## License
 

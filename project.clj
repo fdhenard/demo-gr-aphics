@@ -5,6 +5,9 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [clojure.java-time "0.3.2"]
-                 [org.clojure/tools.cli "0.4.2"]]
+                 [org.clojure/tools.cli "0.4.2"]
+                 [ring/ring-core "1.6.3"]
+                 [ring/ring-jetty-adapter "1.6.3"]
+                 [mount "0.1.16"]]
   :repl-options {:init-ns demo-gr-aphics.core}
   :main demo-gr-aphics.cli)
