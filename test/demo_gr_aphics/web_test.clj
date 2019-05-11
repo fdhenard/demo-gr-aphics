@@ -27,3 +27,14 @@
                      :uri "/records"
                      :body "lname fname female green 2014-03-22"})]
     (is (= (:status actual) 400))))
+
+(deftest post-fail-bad-body
+  (let [actual (app {:request-method :post
+                     :uri "/records"
+                     :body "what???"
+                     :headers {:delimiter "space"}})
+        ;; _ (clojure.pprint/pprint actual)
+        ;; _ (println (-> actual :body :spec-expound-str))
+        ;; _ (println (-> actual :body :spec-explain-str))
+        ]
+    (is (= (:status actual) 400))))

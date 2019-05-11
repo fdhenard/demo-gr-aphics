@@ -3,7 +3,8 @@
             [clojure.string :as str]
             [java-time :as time]
             [clojure.spec.alpha :as spec]
-            [clojure.pprint :as pprint]))
+            [clojure.pprint :as pprint]
+            [expound.alpha :as expound]))
 
 (defn will-coerce-to-local-date? [x]
   (try
@@ -37,6 +38,7 @@
         []
         (keys gender-options-map))))
 (spec/def ::gender gender-options)
+(expound/defmsg ::gender (str "should be one of " gender-options))
 (spec/def ::birthdate (spec/and
                        ::non-blank-string
                        will-coerce-to-local-date?
@@ -69,10 +71,12 @@
                             :birthdate dob}
         spec-explain-data (spec/explain-data ::demographic-record demographic-record)
         spec-explain-str (spec/explain-str ::demographic-record demographic-record)
+        spec-expound-str (expound/expound-str ::demographic-record demographic-record)
         ]
     (if (not (nil? spec-explain-data))
       {:error {:spec-explain-data spec-explain-data
                :spec-explain-str spec-explain-str
+               :spec-expound-str spec-expound-str
                :line line}
        :result nil}
       {:result {:last-name lname
