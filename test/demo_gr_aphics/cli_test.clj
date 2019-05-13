@@ -16,10 +16,16 @@
                    :delimiter "space"}))))
 
 (deftest validate-args-webserver-test
+  (let [actual (validate-args ["webserver" "--port" "3001"])
+        ;; _ (clojure.pprint/pprint actual)
+        ]
+    (is (= actual {:webserver? true :port 3001}))))
+
+(deftest validate-args-webserver-default-port-test
   (let [actual (validate-args ["webserver"])
         ;; _ (clojure.pprint/pprint actual)
         ]
-    (is (= actual {:webserver? true}))))
+    (is (= actual {:webserver? true :port 3000}))))
 
 (deftest validate-args-error-test
   (let [actual (validate-args ["webserver" "--what"])

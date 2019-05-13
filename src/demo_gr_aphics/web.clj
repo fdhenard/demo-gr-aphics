@@ -87,6 +87,6 @@
            (ring/create-default-handler))))
 
 (mount/defstate webserver
-  :start (jetty/run-jetty app {:port 3000
+  :start (jetty/run-jetty app {:port (:port (mount/args))
                                :join? false})
   :stop (.stop webserver))

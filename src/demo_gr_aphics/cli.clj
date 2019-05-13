@@ -7,6 +7,12 @@
             [demo-gr-aphics.file])
   (:gen-class))
 
+(def cli-options
+  [["-p" "--port PORT" "Port Number"
+    :default 3000
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]])
+
 (defn usage [options-summary]
   (->> [""
         "demo-gr-aphics line processing - web or file"
@@ -26,7 +32,10 @@
         "For webserver: "
         "$ lein run !!!!change!!! webserver"
         ""
-        "  then navigate to http://localhost:3000"
+        "Webserver Options:"
+        options-summary
+        ""
+        "  then navigate to http://localhost:<port>"
         ""]
        (str/join \newline)))
 
@@ -35,7 +44,7 @@
        (str/join \newline errors)))
 
 (defn validate-args [args]
-  (let [{:keys [options arguments errors summary]} (cli/parse-opts args [])]
+  (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]
     (cond
       errors ; errors => exit with description of errors
       {:exit-message (error-msg errors)}
@@ -45,17 +54,18 @@
       {:filepath (first arguments) :delimiter (nth arguments 1)}
       (and (= 1 (count arguments))
            (= "webserver" (nth arguments 0)))
-      {:webserver? true}
+      {:webserver? true :port (:port options)}
       :else ; failed custom validation => exit with usage summary
       {:exit-message (usage summary)})))
 
 (defn -main [& args]
-  (let [{:keys [filepath delimiter webserver? exit-message ok?]} (validate-args args)]
+  (let [{:keys [filepath delimiter webserver? port exit-message ok?]} (validate-args args)]
     (cond
       exit-message
       (println exit-message)
       webserver?
       (-> (mount/only #{#'demo-gr-aphics.web/webserver})
+          (mount/with-args {:port port})
           mount/start)
       :else
       (demo-gr-aphics.file/process-file! filepath delimiter))))
