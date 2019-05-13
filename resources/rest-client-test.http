@@ -39,3 +39,11 @@ fname4 | lname4 | f | green | 2015-11-25
 # sorted by gender
 
 GET http://localhost:3000/records/gender
+
+# sorted by birthdate
+
+GET http://localhost:3000/records/birthdate
+
+# sorted by name
+
+GET http://localhost:3000/records/name
