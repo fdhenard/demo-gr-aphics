@@ -1,9 +1,7 @@
 (ns demo-gr-aphics.core
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [java-time :as time]
             [clojure.spec.alpha :as spec]
-            [clojure.pprint :as pprint]
             [expound.alpha :as expound]))
 
 (defn will-coerce-to-local-date? [x]
@@ -103,59 +101,5 @@
 ;;             poss
 ;;             (recur (rest remaining-poss))))))))
 
-(def gender-to-display {:m "Male"
-                        :f "Female"})
-
 (defn rec->displayable [demog-rec]
   (assoc demog-rec :birthdate (time/format "M/d/YYYY" (:birthdate demog-rec))))
-
-(defn rec->displayable-for-cli [demog-rec]
-  (as-> demog-rec $
-    (rec->displayable $)
-    (assoc $ :gender (get gender-to-display (:gender $)))
-    (clojure.walk/stringify-keys $)))
-
-
-(defn process-file! [filepath delimiter-name]
-  (let [file (io/as-file filepath)]
-    (if (not (.exists file))
-      (println (str "file './" filepath "' does not exist"))
-      (let [file-as-str (slurp file)
-            lines (clojure.string/split file-as-str #"\n")
-            delimiter-regex (get delimiter-regexes (keyword delimiter-name))
-            xform-results (as-> lines $
-                            (map-indexed
-                             (fn [idx line]
-                               (-> line
-                                   (line->map delimiter-regex)
-                                   (assoc :line-num (inc idx))))
-                             $)
-                            (group-by #(if (nil? (:result %)) :error :result) $))
-            ;; _ (pprint/pprint xform-results)
-            errored-lines (->> (:error xform-results)
-                               (map #(-> %
-                                         :error
-                                         (assoc :line-num (:line-num %)))))
-            ;; _ (pprint/pprint errored-lines)
-            _ (println "\nerrors:\n")
-            _ (doseq [errd-line errored-lines]
-                (println (str "error for line number " (:line-num errd-line)
-                              ", line: \"" (:line errd-line) "\""))
-                (println (str (:spec-explain-str errd-line) "\n")))
-            demog-recs (->> (:result xform-results)
-                            (map #(:result %)))
-            ;; _ (pprint/pprint demog-recs)
-            sorted-by-gender-lname (sort-by (juxt :gender :last-name) demog-recs)
-            display-sorted-gender-lname (map rec->displayable-for-cli sorted-by-gender-lname)
-            sorted-by-dob (sort-by :birthdate demog-recs)
-            display-sorted-dob (map rec->displayable-for-cli sorted-by-dob)
-            sorted-by-lname-desc (sort-by :last-name #(compare %2 %1) demog-recs)
-            display-sorted-lname-desc (map rec->displayable-for-cli sorted-by-lname-desc)
-            _ (println "\n\nOutput 1 – sorted by gender (females before males) then by last name ascending")
-            _ (pprint/print-table display-sorted-gender-lname)
-            _ (println "\n\nOutput 2 – sorted by birth date, ascending")
-            _ (pprint/print-table display-sorted-dob)
-            _ (println "\n\nOutput 3 - sorted by last name, descending")
-            _ (pprint/print-table display-sorted-lname-desc)
-            ]
-        nil))))

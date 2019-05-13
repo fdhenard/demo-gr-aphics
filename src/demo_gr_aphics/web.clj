@@ -76,7 +76,10 @@
                         :middleware [wrap-body-string]}}]
     ["/records/gender" {:get {:handler (partial get-demog-recs-sorted :gender)}}]
     ["/records/birthdate" {:get {:handler (partial get-demog-recs-sorted :birthdate)}}]
-    ["/records/name" {:get {:handler (partial get-demog-recs-sorted (juxt :last-name :first-name))}}]]))
+    ["/records/name" {:get {:handler (partial get-demog-recs-sorted (juxt :last-name :first-name))}}]
+    ["/ping" {:get {:handler (constantly {:status 200
+                                          :body "ok"
+                                          :headers {"Content-Type" "text/html"}})}}]]))
 
 (def app (wrap-base
           (ring/ring-handler

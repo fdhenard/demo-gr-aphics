@@ -8,12 +8,15 @@ FIXME
 
 ## Assumptions
 
+- user has leiningen
 - only one input file per run
-- all records can be loaded into memory
-- file extension describes the delimiter format
-- any problems with the records will be rejected
+- all records from the file can fit into available memory
+- delimiter types are described in cli run usage, or header on web
+- any records with problems will be rejected
 - only 2 genders (state why - referenced in instructions!!!!!)
 - input date must coerce to java-time/local-date - recommend 'YYYY-MM-DD'
+- webserver
+    - runs on port 3000
 
 ## License
 

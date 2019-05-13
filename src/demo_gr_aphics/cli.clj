@@ -3,7 +3,8 @@
             [clojure.string :as str]
             [demo-gr-aphics.core :as core]
             [mount.core :as mount]
-            [demo-gr-aphics.web ])
+            [demo-gr-aphics.web]
+            [demo-gr-aphics.file])
   (:gen-class))
 
 (defn usage [options-summary]
@@ -23,7 +24,7 @@
         ""
         ""
         "For webserver: "
-        "$ lein run !!!!change!!! runserver"
+        "$ lein run !!!!change!!! webserver"
         ""
         "  then navigate to http://localhost:3000"
         ""]
@@ -45,7 +46,7 @@
            (core/delimiter-choices (nth arguments 1)))
       {:filepath (first arguments) :delimiter (nth arguments 1)}
       (and (= 1 (count arguments))
-           (= "runserver" (nth arguments 0)))
+           (= "webserver" (nth arguments 0)))
       {:webserver? true}
       :else ; failed custom validation => exit with usage summary
       {:exit-message (usage summary)})))
@@ -59,4 +60,4 @@
       (-> (mount/only #{#'demo-gr-aphics.web/webserver})
           mount/start)
       :else
-      (core/process-file! filepath delimiter))))
+      (demo-gr-aphics.file/process-file! filepath delimiter))))
