@@ -17,6 +17,7 @@ FIXME
 - input date must coerce to java-time/local-date - recommend 'YYYY-MM-DD'
 - webserver
     - runs on port 3000
+    - no security concerns
 
 ## License
 

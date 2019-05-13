@@ -19,7 +19,7 @@
   (let [actual (validate-args ["webserver"])
         ;; _ (clojure.pprint/pprint actual)
         ]
-    (is (= actual {:webserver true}))))
+    (is (= actual {:webserver? true}))))
 
 (deftest validate-args-error-test
   (let [actual (validate-args ["webserver" "--what"])

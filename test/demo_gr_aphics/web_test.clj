@@ -1,6 +1,7 @@
 (ns demo-gr-aphics.web-test
   (:require [clojure.test :refer :all]
-            [demo-gr-aphics.web :refer :all]))
+            [demo-gr-aphics.web :refer :all]
+            [clojure.data.json :as json]))
 
 (deftest post-success
   (let [actual (app {:request-method :post
@@ -49,34 +50,40 @@
     (load-rec-helper! "lname3, fname3, m, indigo, 1988-01-18" "comma")
     (load-rec-helper! "lname4 fname4 F violet 2000-03-06" "space")))
 
+(defn to-json [str-in]
+  (json/read-str str-in :key-fn keyword))
+
 (deftest get-recs-sorted-by-name-success
   (let [_ (load-recs!)
         actual (app {:request-method :get
                      :uri "/records/name"})
         ;; _ (clojure.pprint/pprint actual)
         ]
-    (is (= 4 (-> actual :result count)))
-    (let [first-one (-> actual :result first)
-          last-one (-> actual :result last)]
-      (is (= "lname1" (:last-name first-one)))
-      (is (= "fname1" (:first-name first-one)))
-      (is (= "lname4" (:last-name last-one)))
-      (is (= "fname4" (:first-name last-one))))))
+    (let [result (-> actual :body to-json :result)]
+      (is (= 4 (count result)))
+      (let [first-one (first result)
+            last-one (last result)]
+        (is (= "lname1" (:last-name first-one)))
+        (is (= "fname1" (:first-name first-one)))
+        (is (= "lname4" (:last-name last-one)))
+        (is (= "fname4" (:first-name last-one)))))))
 
 (deftest get-recs-sorted-by-birthdate-success
   (let [_ (load-recs!)
         actual (app {:request-method :get
                      :uri "/records/birthdate"})]
-    (is (= 4 (-> actual :result count)))
-    (let [first-one (-> actual :result first)
-          last-one (-> actual :result last)]
-      (is (= "1/18/1988" (:birthdate first-one)))
-      (is (= "3/9/2012" (:birthdate last-one))))))
+    (let [result (-> actual :body to-json :result)]
+     (is (= 4 (count result)))
+     (let [first-one (first result)
+           last-one (last result)]
+       (is (= "1/18/1988" (:birthdate first-one)))
+       (is (= "3/9/2012" (:birthdate last-one)))))))
 
 (deftest get-recs-sorted-by-gender-success
   (let [_ (load-recs!)
         actual (app {:request-method :get
                      :uri "/records/gender"})]
-    (is (= 4 (-> actual :result count)))
-    (let [genders (mapv :gender (:result actual))]
-      (is (= [:f :f :m :m] genders)))))
+    (let [result (-> actual :body to-json :result)]
+     (is (= 4 (count result)))
+     (let [genders (mapv :gender result)]
+       (is (= ["f" "f" "m" "m"] genders))))))

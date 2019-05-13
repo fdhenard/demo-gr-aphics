@@ -14,6 +14,7 @@
                  [expound "0.7.2"]
                  [metosin/muuntaja "0.6.4"]
                  [ring/ring-json "0.4.0"]
-                 [ring/ring-defaults "0.3.2"]]
+                 [ring/ring-defaults "0.3.2"]
+                 [org.clojure/data.json "0.2.6"]]
   :repl-options {:init-ns demo-gr-aphics.core}
   :main demo-gr-aphics.cli)
