@@ -38,19 +38,22 @@
               ]
           {:status 400
            :body {:message message}}))
-      (let [ ;; _ (clojure.pprint/pprint request)
+      (let [;; _ (clojure.pprint/pprint request)
             delimiter-kw (keyword (get-in request [:headers :delimiter]))
             ;; _ (println "delimiter-kw" )
             delimiter-re (get core/delimiter-regexes delimiter-kw)
             body (-> request ring-util-req/body-string str/trim)
             xform-res (core/line->canonical-or-error-map body delimiter-re)]
-        (if-let [error (:error xform-res)]
+        (case (:type xform-res)
+          :error
           {:status 400
-           :body error}
+           :body xform-res}
+          :demog-rec
           (do
-            (swap! demog-recs conj (:result xform-res))
+            (swap! demog-recs conj (dissoc xform-res :type))
             {:status 201
-             :body {:success true}}))))))
+             :body {:success true}})
+          (throw (Exception. (str "programming error - unexpected type of '" (:type xform-res) "'"))))))))
 
 (defn get-demog-recs-sorted [sort-by-key-fn request]
   (let [sorted (sort-by sort-by-key-fn @demog-recs)]

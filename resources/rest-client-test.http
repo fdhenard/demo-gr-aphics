@@ -1,12 +1,19 @@
 
+# success
 
 POST http://localhost:3000/records
 Delimiter: space
 fname1 lname1 m red 2010-01-01
 
-# Content-Type: application/json
+# fails - multiple lines
 
 POST http://localhost:3000/records
 delimiter: space
 fname1 lname1 m red 2010-01-01
 fname2 lname2 f blue 2000-01-01
+
+# fails - bad birthdate
+
+POST http://localhost:3000/records
+delimiter: space
+fname2 lname2 f blue 2000-01-99

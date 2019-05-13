@@ -18,18 +18,7 @@
                       (-> line
                           (core/line->canonical-or-error-map delimiter-regex)
                           (assoc :line-num (inc idx)))))
-       ;; (group-by #(if (nil? (:result %)) :error :result))
-       (group-by #(cond
-                    (and (nil? (:result %))
-                         (not (nil? (:error %))))
-                    :error
-                    (and (nil? (:error %))
-                         (not (nil? (:result %))))
-                    :result
-                    :else
-                    (throw (Exception. "should be only error or result"))))))
-
-;; (defn xform-file [file-contents delimiter-regex])
+       (group-by :type)))
 
 (defn get-display-sorted [canonical-demog-recs sort-fn]
   (let [sorted (sort-fn canonical-demog-recs)]
@@ -47,14 +36,9 @@
             delimiter-regex (get core/delimiter-regexes (keyword delimiter-name))
             canonical-or-error-maps (lines->canonical-or-error-maps lines delimiter-regex)
             ;; _ (pprint/pprint canonical-or-error-maps)
-            errored-lines (->> (:error canonical-or-error-maps)
-                               (map #(-> %
-                                         :error
-                                         (assoc :line-num (:line-num %)))))
-            canonical-demog-recs (->> (:result canonical-or-error-maps)
-                                      (map #(:result %)))
+            canonical-demog-recs (:demog-rec canonical-or-error-maps)
             _ (println "\nerrors:\n")
-            _ (doseq [errd-line errored-lines]
+            _ (doseq [errd-line (:error canonical-or-error-maps)]
                 (println (str "error for line number " (:line-num errd-line)
                               ", line: \"" (:line errd-line) "\""))
                 (println (str (:spec-explain-str errd-line) "\n")))

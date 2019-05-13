@@ -72,17 +72,17 @@
         spec-expound-str (expound/expound-str ::demographic-record demographic-record)
         ]
     (if (not (nil? spec-explain-data))
-      {:error {:spec-explain-data spec-explain-data
-               :spec-explain-str spec-explain-str
-               :spec-expound-str spec-expound-str
-               :line line}
-       :result nil}
-      {:result {:last-name lname
-                :first-name fname
-                :gender (get gender-options-map (str/lower-case gender))
-                :favorite-color fav-color
-                :birthdate (time/local-date dob)}
-       :error nil})))
+      {:type :error
+       :spec-explain-data spec-explain-data
+       :spec-explain-str spec-explain-str
+       :spec-expound-str spec-expound-str
+       :line line}
+      {:type :demog-rec
+       :last-name lname
+       :first-name fname
+       :gender (get gender-options-map (str/lower-case gender))
+       :favorite-color fav-color
+       :birthdate (time/local-date dob)})))
 
 
 ;; (defn find-delimiter [line]
@@ -102,4 +102,6 @@
 ;;             (recur (rest remaining-poss))))))))
 
 (defn canonical->displayable [demog-rec]
-  (assoc demog-rec :birthdate (time/format "M/d/YYYY" (:birthdate demog-rec))))
+  (as-> demog-rec $
+    (apply dissoc $ [:type :line-num])
+    (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))))

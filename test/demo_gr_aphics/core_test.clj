@@ -4,22 +4,21 @@
             [java-time :as time]))
 
 (defn get-problems-from-line-map [line-map]
-  (get-in line-map [:error :spec-explain-data :clojure.spec.alpha/problems]))
+  (get-in line-map [:spec-explain-data :clojure.spec.alpha/problems]))
 
 (deftest line->canonical-or-error-map-test
   (testing "success"
     (let [res (line->canonical-or-error-map "lname | fname | m | blue | 2013-03-04" (:pipe delimiter-regexes))
-          expecting {:result {:last-name "lname"
-                              :first-name "fname"
-                              :gender :m
-                              :favorite-color "blue"
-                              :birthdate (time/local-date "2013-03-04")}
-                     :error nil}]
+          expecting {:type :demog-rec
+                     :last-name "lname"
+                     :first-name "fname"
+                     :gender :m
+                     :favorite-color "blue"
+                     :birthdate (time/local-date "2013-03-04")}]
       (is (= res expecting))))
   (testing "general fail"
     (let [actual (line->canonical-or-error-map "lname" (:pipe delimiter-regexes))]
-      (is (nil? (:result actual)))
-      (is (not (nil? (:error actual))))))
+      (is (= :error (:type actual)))))
   (testing "fail - gender invalid"
     (let [actual (line->canonical-or-error-map "lname | fname | g | red | 2013-02-03" (:pipe delimiter-regexes))
           ;; _ (clojure.pprint/pprint actual)
