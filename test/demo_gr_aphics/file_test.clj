@@ -37,4 +37,4 @@
     (is (= "lname1" (-> actual last (get "last-name"))))))
 
 (deftest process-file-test
-  (is (nil? (process-file! "initial-file-test.csv" "pipe"))))
+  (is (nil? (process-file! "resources/test-file.csv" "pipe"))))
