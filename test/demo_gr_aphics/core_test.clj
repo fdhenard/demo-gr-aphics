@@ -6,9 +6,9 @@
 (defn get-problems-from-line-map [line-map]
   (get-in line-map [:error :spec-explain-data :clojure.spec.alpha/problems]))
 
-(deftest line->map-test
+(deftest line->canonical-or-error-map-test
   (testing "success"
-    (let [res (line->map "lname | fname | m | blue | 2013-03-04" (:pipe delimiter-regexes))
+    (let [res (line->canonical-or-error-map "lname | fname | m | blue | 2013-03-04" (:pipe delimiter-regexes))
           expecting {:result {:last-name "lname"
                               :first-name "fname"
                               :gender :m
@@ -17,11 +17,11 @@
                      :error nil}]
       (is (= res expecting))))
   (testing "general fail"
-    (let [actual (line->map "lname" (:pipe delimiter-regexes))]
+    (let [actual (line->canonical-or-error-map "lname" (:pipe delimiter-regexes))]
       (is (nil? (:result actual)))
       (is (not (nil? (:error actual))))))
   (testing "fail - gender invalid"
-    (let [actual (line->map "lname | fname | g | red | 2013-02-03" (:pipe delimiter-regexes))
+    (let [actual (line->canonical-or-error-map "lname | fname | g | red | 2013-02-03" (:pipe delimiter-regexes))
           ;; _ (clojure.pprint/pprint actual)
           problems (get-problems-from-line-map actual)]
       (is (and (not (nil? problems)) (= (count problems) 1)))
@@ -30,7 +30,7 @@
             ]
         (is (= (:path problem) [:gender])))))
   (testing "fail - dob invalid"
-    (let [actual (line->map "lname | fname | f | red | wrong" (:pipe delimiter-regexes))
+    (let [actual (line->canonical-or-error-map "lname | fname | f | red | wrong" (:pipe delimiter-regexes))
           problems (get-problems-from-line-map actual)]
       (is (and (not (nil? problems)) (= (count problems) 1)))
       (let [problem (first problems)
@@ -40,7 +40,7 @@
             (is (= (:path problem) [:birthdate]))
             (is (= (:pred problem) 'demo-gr-aphics.core/will-coerce-to-local-date?)))))
   (testing "fail - dob invalid 2"
-    (let [actual (line->map "lname | fname | f | red | 2018-99-99" (:pipe delimiter-regexes))
+    (let [actual (line->canonical-or-error-map "lname | fname | f | red | 2018-99-99" (:pipe delimiter-regexes))
           problems (get-problems-from-line-map actual)]
       (is (= (and (not (nil? problems)) (count problems)) 1))
           (let [problem (first problems)

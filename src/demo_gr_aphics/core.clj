@@ -60,7 +60,7 @@
                             set))
 
 
-(defn line->map [line delimiter-re]
+(defn line->canonical-or-error-map [line delimiter-re]
   (let [[lname fname gender fav-color dob] (str/split line delimiter-re)
         demographic-record {:last-name lname
                             :first-name fname

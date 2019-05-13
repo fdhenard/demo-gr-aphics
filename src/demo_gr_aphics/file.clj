@@ -12,14 +12,24 @@
     (assoc $ :gender (get gender->display (:gender $)))
     (clojure.walk/stringify-keys $)))
 
-(defn lines->canonical-maps [lines delimiter-regex]
+(defn lines->canonical-or-error-maps [lines delimiter-regex]
   (->> lines
-       (map-indexed
-        (fn [idx line]
-          (-> line
-              (core/line->map delimiter-regex)
-              (assoc :line-num (inc idx)))))
-       (group-by #(if (nil? (:result %)) :error :result))))
+       (map-indexed (fn [idx line]
+                      (-> line
+                          (core/line->canonical-or-error-map delimiter-regex)
+                          (assoc :line-num (inc idx)))))
+       ;; (group-by #(if (nil? (:result %)) :error :result))
+       (group-by #(cond
+                    (and (nil? (:result %))
+                         (not (nil? (:error %))))
+                    :error
+                    (and (nil? (:error %))
+                         (not (nil? (:result %))))
+                    :result
+                    :else
+                    (throw (Exception. "should be only error or result"))))))
+
+(defn xform-file [file-contents delimiter-regex])
 
 (defn process-file! [filepath delimiter-name]
   (let [file (io/as-file filepath)]
@@ -28,13 +38,13 @@
       (let [file-as-str (slurp file)
             lines (clojure.string/split file-as-str #"\n")
             delimiter-regex (get core/delimiter-regexes (keyword delimiter-name))
-            canonical-maps (lines->canonical-maps lines delimiter-regex)
-            ;; _ (pprint/pprint canonical-maps)
-            errored-lines (->> (:error canonical-maps)
+            canonical-or-error-maps (lines->canonical-or-error-maps lines delimiter-regex)
+            ;; _ (pprint/pprint canonical-or-error-maps)
+            errored-lines (->> (:error canonical-or-error-maps)
                                (map #(-> %
                                          :error
                                          (assoc :line-num (:line-num %)))))
-            demog-recs (->> (:result canonical-maps)
+            demog-recs (->> (:result canonical-or-error-maps)
                             (map #(:result %)))
             ;; _ (pprint/pprint demog-recs)
             sorted-by-gender-lname (sort-by (juxt :gender :last-name) demog-recs)

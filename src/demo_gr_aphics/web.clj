@@ -43,7 +43,7 @@
             ;; _ (println "delimiter-kw" )
             delimiter-re (get core/delimiter-regexes delimiter-kw)
             body (-> request ring-util-req/body-string str/trim)
-            xform-res (core/line->map body delimiter-re)]
+            xform-res (core/line->canonical-or-error-map body delimiter-re)]
         (if-let [error (:error xform-res)]
           {:status 400
            :body error}
