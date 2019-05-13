@@ -37,8 +37,6 @@
 (defn validate-args [args]
   (let [{:keys [options arguments errors summary]} (cli/parse-opts args [])]
     (cond
-      (:help options) ; help => exit OK with usage summary
-      {:exit-message (usage summary) :ok? true}
       errors ; errors => exit with description of errors
       {:exit-message (error-msg errors)}
       ;; custom validation on arguments

@@ -51,9 +51,12 @@
 (spec/def ::favorite-color ::rainbow-colors)
 (spec/def ::demographic-record (spec/keys :req-un [::last-name ::first-name ::gender ::favorite-color ::birthdate]))
 
-(def delimiter-regexes {:pipe #"\ \|\ "
-                        :comma #",\ "
-                        :space #"\ "})
+(def pipe #"\ \|\ ")
+(def comma #",\ ")
+(def space #"\ ")
+(def delimiter-regexes {:pipe pipe
+                        :comma comma
+                        :space space})
 (def delimiter-choices (->> delimiter-regexes
                             keys
                             (map name)
@@ -84,24 +87,7 @@
        :favorite-color fav-color
        :birthdate (time/local-date dob)})))
 
-
-;; (defn find-delimiter [line]
-;;   (let [delim-possiblities [#"\ \|\ " #",\ " #"\ "]]
-;;     (loop [remaining-poss delim-possibilities]
-;;       (if (empty? remaining-poss)
-;;         nil
-;;         (let [poss (first remining-poss)
-;;               splitted (str/split line poss)]
-;;           (if (and (= (count splitted) 5)
-;;                    (spec/valid? ::last-name (get splitted 0))
-;;                    (spec/valid? ::first-name (get splitted 1))
-;;                    (spec/valid? ::gender (get splitted 2))
-;;                    (spec/valid? ::rainbow-colors (get splitted 3))
-;;                    (spec/valid? ::date-string (get splitted 4)))
-;;             poss
-;;             (recur (rest remaining-poss))))))))
-
 (defn canonical->displayable [demog-rec]
   (as-> demog-rec $
-    (apply dissoc $ [:type :line-num])
+    (dissoc $ :type)
     (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))))

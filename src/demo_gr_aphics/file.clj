@@ -6,12 +6,6 @@
 (def gender->display {:m "Male"
                       :f "Female"})
 
-(defn canonical->displayable-for-file-processing [demog-rec]
-  (as-> demog-rec $
-    (core/canonical->displayable $)
-    (assoc $ :gender (get gender->display (:gender $)))
-    (clojure.walk/stringify-keys $)))
-
 (defn lines->canonical-or-error-maps [lines delimiter-regex]
   (->> lines
        (map-indexed (fn [idx line]
@@ -19,6 +13,13 @@
                           (core/line->canonical-or-error-map delimiter-regex)
                           (assoc :line-num (inc idx)))))
        (group-by :type)))
+
+(defn canonical->displayable-for-file-processing [demog-rec]
+  (as-> demog-rec $
+    (core/canonical->displayable $)
+    (dissoc $ :line-num)
+    (assoc $ :gender (get gender->display (:gender $)))
+    (clojure.walk/stringify-keys $)))
 
 (defn get-display-sorted [canonical-demog-recs sort-fn]
   (let [sorted (sort-fn canonical-demog-recs)]
