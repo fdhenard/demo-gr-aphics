@@ -9,9 +9,7 @@
                      :headers {:delimiter "space"}})
         ;; _ (clojure.pprint/pprint actual)
         ]
-    (is (= actual
-           {:status 201
-            :body {:success true}}))))
+    (is (= 201 (:status actual)))))
 
 (deftest post-fail-no-body
   (let [actual (app {:request-method :post
