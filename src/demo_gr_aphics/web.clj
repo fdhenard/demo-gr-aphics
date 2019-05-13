@@ -31,13 +31,11 @@
 (defn post-demog-rec! [request]
   (let [request (keywordize-headers request)]
     (if-let [explain-req (spec/explain-data ::post-demog-rec-request request)]
-      (do
-        ;; (clojure.pprint/pprint explain-req)
-        (let [message (expound/expound-str ::post-demog-rec-request request)
-              ;; _ (println message)
-              ]
-          {:status 400
-           :body {:message message}}))
+      (let [message (expound/expound-str ::post-demog-rec-request request)
+            ;; _ (println message)
+            ]
+        {:status 400
+         :body {:message message}})
       (let [;; _ (clojure.pprint/pprint request)
             delimiter-kw (keyword (get-in request [:headers :delimiter]))
             ;; _ (println "delimiter-kw" )
@@ -69,9 +67,7 @@
 
 (defn wrap-base [handler]
   (-> handler
-      ;; (mw-defaults/wrap-defaults mw-defaults/api-defaults)
-      json-middleware/wrap-json-response
-      ))
+      json-middleware/wrap-json-response))
 
 (def router
   (ring/router
