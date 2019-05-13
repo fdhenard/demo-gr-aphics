@@ -29,7 +29,14 @@
                     :else
                     (throw (Exception. "should be only error or result"))))))
 
-(defn xform-file [file-contents delimiter-regex])
+;; (defn xform-file [file-contents delimiter-regex])
+
+(defn get-display-sorted [canonical-demog-recs sort-fn]
+  (let [sorted (sort-fn canonical-demog-recs)]
+    (map canonical->displayable-for-file-processing sorted)))
+
+(defn sort-reverse [a b]
+  (compare b a))
 
 (defn process-file! [filepath delimiter-name]
   (let [file (io/as-file filepath)]
@@ -45,25 +52,23 @@
                                          :error
                                          (assoc :line-num (:line-num %)))))
             canonical-demog-recs (->> (:result canonical-or-error-maps)
-                            (map #(:result %)))
-            ;; _ (pprint/pprint canonical-demog-recs)
-            sorted-by-gender-lname (sort-by (juxt :gender :last-name) canonical-demog-recs)
-            display-sorted-gender-lname (map canonical->displayable-for-file-processing sorted-by-gender-lname)
-            sorted-by-dob (sort-by :birthdate canonical-demog-recs)
-            display-sorted-dob (map canonical->displayable-for-file-processing sorted-by-dob)
-            sorted-by-lname-desc (sort-by :last-name #(compare %2 %1) canonical-demog-recs)
-            display-sorted-lname-desc (map canonical->displayable-for-file-processing sorted-by-lname-desc)
-            ;; _ (pprint/pprint errored-lines)
+                                      (map #(:result %)))
             _ (println "\nerrors:\n")
             _ (doseq [errd-line errored-lines]
                 (println (str "error for line number " (:line-num errd-line)
                               ", line: \"" (:line errd-line) "\""))
                 (println (str (:spec-explain-str errd-line) "\n")))
             _ (println "\n\nOutput 1 – sorted by gender (females before males) then by last name ascending")
-            _ (pprint/print-table display-sorted-gender-lname)
+            _ (pprint/print-table (get-display-sorted
+                                   canonical-demog-recs
+                                   #(sort-by (juxt :gender :last-name) %)))
             _ (println "\n\nOutput 2 – sorted by birth date, ascending")
-            _ (pprint/print-table display-sorted-dob)
+            _ (pprint/print-table (get-display-sorted
+                                   canonical-demog-recs
+                                   #(sort-by :birthdate %)))
             _ (println "\n\nOutput 3 - sorted by last name, descending")
-            _ (pprint/print-table display-sorted-lname-desc)
+            _ (pprint/print-table (get-display-sorted
+                                   canonical-demog-recs
+                                   #(sort-by :last-name sort-reverse %)))
             ]
         nil))))
