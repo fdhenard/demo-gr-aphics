@@ -101,5 +101,5 @@
 ;;             poss
 ;;             (recur (rest remaining-poss))))))))
 
-(defn rec->displayable [demog-rec]
+(defn canonical->displayable [demog-rec]
   (assoc demog-rec :birthdate (time/format "M/d/YYYY" (:birthdate demog-rec))))

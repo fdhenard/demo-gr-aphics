@@ -6,9 +6,9 @@
 (def gender->display {:m "Male"
                       :f "Female"})
 
-(defn rec->displayable-for-file-processing [demog-rec]
+(defn canonical->displayable-for-file-processing [demog-rec]
   (as-> demog-rec $
-    (core/rec->displayable $)
+    (core/canonical->displayable $)
     (assoc $ :gender (get gender->display (:gender $)))
     (clojure.walk/stringify-keys $)))
 
@@ -44,15 +44,15 @@
                                (map #(-> %
                                          :error
                                          (assoc :line-num (:line-num %)))))
-            demog-recs (->> (:result canonical-or-error-maps)
+            canonical-demog-recs (->> (:result canonical-or-error-maps)
                             (map #(:result %)))
-            ;; _ (pprint/pprint demog-recs)
-            sorted-by-gender-lname (sort-by (juxt :gender :last-name) demog-recs)
-            display-sorted-gender-lname (map rec->displayable-for-file-processing sorted-by-gender-lname)
-            sorted-by-dob (sort-by :birthdate demog-recs)
-            display-sorted-dob (map rec->displayable-for-file-processing sorted-by-dob)
-            sorted-by-lname-desc (sort-by :last-name #(compare %2 %1) demog-recs)
-            display-sorted-lname-desc (map rec->displayable-for-file-processing sorted-by-lname-desc)
+            ;; _ (pprint/pprint canonical-demog-recs)
+            sorted-by-gender-lname (sort-by (juxt :gender :last-name) canonical-demog-recs)
+            display-sorted-gender-lname (map canonical->displayable-for-file-processing sorted-by-gender-lname)
+            sorted-by-dob (sort-by :birthdate canonical-demog-recs)
+            display-sorted-dob (map canonical->displayable-for-file-processing sorted-by-dob)
+            sorted-by-lname-desc (sort-by :last-name #(compare %2 %1) canonical-demog-recs)
+            display-sorted-lname-desc (map canonical->displayable-for-file-processing sorted-by-lname-desc)
             ;; _ (pprint/pprint errored-lines)
             _ (println "\nerrors:\n")
             _ (doseq [errd-line errored-lines]

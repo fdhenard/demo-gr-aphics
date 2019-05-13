@@ -55,7 +55,7 @@
 (defn get-demog-recs-sorted [sort-by-key-fn request]
   (let [sorted (sort-by sort-by-key-fn @demog-recs)]
     {:status 200
-     :result (map core/rec->displayable sorted)}))
+     :result (map core/canonical->displayable sorted)}))
 
 (defn wrap-body-string [handler]
   (fn [request]
