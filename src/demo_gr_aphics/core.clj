@@ -75,7 +75,7 @@
 (defn line->canonical-or-error-map
   "transform a line to either the canonical demographic record or an error map"
   [line delimiter-re]
-  (let [[lname fname gender fav-color dob] (str/split line delimiter-re)
+  (let [[lname fname gender fav-color dob] (map str/trim (str/split line delimiter-re))
         demographic-record {:last-name lname
                             :first-name fname
                             :gender gender
@@ -92,9 +92,9 @@
        :spec-expound-str spec-expound-str
        :line line}
       {:type :demog-rec
-       :last-name (str/trim lname)
-       :first-name (str/trim fname)
-       :gender (get gender-options-map (-> gender str/trim str/lower-case))
+       :last-name lname
+       :first-name fname
+       :gender (get gender-options-map (str/lower-case gender))
        :favorite-color fav-color
        :birthdate (time/local-date dob)})))
 
