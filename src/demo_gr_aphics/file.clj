@@ -6,7 +6,9 @@
 (def gender->display {:m "Male"
                       :f "Female"})
 
-(defn lines->canonical-or-error-maps [lines delimiter-regex]
+(defn lines->canonical-or-error-maps
+  "transform multiple lines to canonical or error maps from core.  Then group them by their types -> :demog-rec, or :error"
+  [lines delimiter-regex]
   (->> lines
        (map-indexed (fn [idx line]
                       (-> line
@@ -14,7 +16,9 @@
                           (assoc :line-num (inc idx)))))
        (group-by :type)))
 
-(defn canonical->displayable-for-file-processing [demog-rec]
+(defn canonical->displayable-for-file-processing
+  "transform a canonical demographic record to the display desired for file processing output"
+  [demog-rec]
   (as-> demog-rec $
     (core/canonical->displayable $)
     (dissoc $ :line-num)
@@ -28,7 +32,9 @@
 (defn sort-reverse [a b]
   (compare b a))
 
-(defn process-file! [filepath delimiter-name]
+(defn process-file!
+  "side effecting - takes file input, does the transformations, and outputs to standard out"
+  [filepath delimiter-name]
   (let [file (io/as-file filepath)]
     (if (not (.exists file))
       (println (str "file './" filepath "' does not exist"))
