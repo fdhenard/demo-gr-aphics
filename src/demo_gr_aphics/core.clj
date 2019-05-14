@@ -80,16 +80,12 @@
                             :first-name fname
                             :gender gender
                             :favorite-color fav-color
-                            :birthdate dob}
-        spec-explain-data (spec/explain-data ::demographic-record demographic-record)
-        spec-explain-str (spec/explain-str ::demographic-record demographic-record)
-        spec-expound-str (expound/expound-str ::demographic-record demographic-record)
-        ]
-    (if (not (nil? spec-explain-data))
+                            :birthdate dob}]
+    (if-let [spec-explain-data (spec/explain-data ::demographic-record demographic-record)]
       {:type :error
        :spec-explain-data spec-explain-data
-       :spec-explain-str spec-explain-str
-       :spec-expound-str spec-expound-str
+       :spec-explain-str (spec/explain-str ::demographic-record demographic-record)
+       :spec-expound-str (expound/expound-str ::demographic-record demographic-record)
        :line line}
       {:type :demog-rec
        :last-name lname
