@@ -7,9 +7,11 @@
             [demo-gr-aphics.file])
   (:gen-class))
 
+(def port-default 3000)
+
 (def cli-options
-  [["-p" "--port PORT" "Port Number"
-    :default 3000
+  [["-p" "--port PORT" (str "Port Number (default " port-default ")")
+    :default port-default
     :parse-fn #(Integer/parseInt %)
     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]])
 
@@ -21,7 +23,7 @@
         ""
         ""
         "For file processing: "
-        "$ lein run!!!change!!! filepath delimiter"
+        "$ lein run filepath delimiter"
         ""
         "Delimiter options:"
         "  pipe  ' | '"
@@ -30,7 +32,7 @@
         ""
         ""
         "For webserver: "
-        "$ lein run !!!!change!!! webserver"
+        "$ lein run webserver"
         ""
         "Webserver Options:"
         options-summary

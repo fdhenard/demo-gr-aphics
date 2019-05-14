@@ -4,6 +4,11 @@
             [clojure.spec.alpha :as spec]
             [expound.alpha :as expound]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; clojure.spec for validating the demographic record coming in from the
+;; file or from web
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn will-coerce-to-local-date? [x]
   (try
     (do
@@ -49,6 +54,10 @@
                              "indigo"
                              "violet"})
 (spec/def ::favorite-color ::rainbow-colors)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; finally the demographic spec 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (spec/def ::demographic-record (spec/keys :req-un [::last-name ::first-name ::gender ::favorite-color ::birthdate]))
 
 (def pipe #"\ \|\ ")
@@ -63,7 +72,9 @@
                             set))
 
 
-(defn line->canonical-or-error-map [line delimiter-re]
+(defn line->canonical-or-error-map
+  "transform a line to either the canonical demographic record or an error map"
+  [line delimiter-re]
   (let [[lname fname gender fav-color dob] (str/split line delimiter-re)
         demographic-record {:last-name lname
                             :first-name fname
@@ -81,13 +92,15 @@
        :spec-expound-str spec-expound-str
        :line line}
       {:type :demog-rec
-       :last-name lname
-       :first-name fname
-       :gender (get gender-options-map (str/lower-case gender))
+       :last-name (str/trim lname)
+       :first-name (str/trim fname)
+       :gender (get gender-options-map (-> gender str/trim str/lower-case))
        :favorite-color fav-color
        :birthdate (time/local-date dob)})))
 
-(defn canonical->displayable [demog-rec]
+(defn canonical->displayable
+  "transform a canonical demographic record to one that is displayable as is commonly needed for file processing and web processing"
+  [demog-rec]
   (as-> demog-rec $
     (dissoc $ :type)
     (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))))
