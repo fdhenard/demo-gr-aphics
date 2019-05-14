@@ -13,7 +13,13 @@
             [ring.middleware.defaults :as mw-defaults]
             [clojure.string :as str]))
 
-(def demog-recs (atom []))
+(def demog-recs
+  "runtime state (db) of all the demographic records added"
+  (atom []))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; clojure.spec for the request
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (spec/def ::single-line? #(not (.contains (str/trim %) "\n")))
 (expound/defmsg ::single-line? "return characters not allowed in body for this endpoint")
@@ -28,7 +34,9 @@
 (defn keywordize-headers [request]
   (assoc request :headers (-> request :headers clojure.walk/keywordize-keys)))
 
-(defn post-demog-rec! [request]
+(defn post-demog-rec!
+  "post function to add demographic record"
+  [request]
   (let [request (keywordize-headers request)]
     (if-let [explain-req (spec/explain-data ::post-demog-rec-request request)]
       (let [message (expound/expound-str ::post-demog-rec-request request)
@@ -53,19 +61,25 @@
              :body {:success true}})
           (throw (Exception. (str "programming error - unexpected type of '" (:type xform-res) "'"))))))))
 
-(defn get-demog-recs-sorted [sort-by-key-fn request]
+(defn get-demog-recs-sorted
+  "a shared endpoint function for the GET endpoints and their corresponding sorting orders"
+  [sort-by-key-fn request]
   (let [sorted (sort-by sort-by-key-fn @demog-recs)]
     {:status 200
      :body {:result (map core/canonical->displayable sorted)}}))
 
-(defn wrap-body-string [handler]
+(defn wrap-body-string
+  "convert the body to a string if it is not.  Does no transformation if the body is already a string which is helpful for automated testing of endpoints through the router"
+  [handler]
   (fn [request]
     (if (string? (:body request))
       (handler request)
       (let [body-str (ring.util.request/body-string request)]
         (handler (assoc request :body body-str))))))
 
-(defn wrap-base [handler]
+(defn wrap-base
+  "some ring middleware"
+  [handler]
   (-> handler
       json-middleware/wrap-json-response))
 

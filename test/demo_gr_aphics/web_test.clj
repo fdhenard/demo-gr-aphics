@@ -4,41 +4,47 @@
             [clojure.data.json :as json]))
 
 (deftest post-success
-  (let [actual (app {:request-method :post
-                     :uri "/records"
-                     :body "lname fname female green 2014-03-22"
-                     :headers {:delimiter "space"}})
-        ;; _ (clojure.pprint/pprint actual)
-        ]
-    (is (= 201 (:status actual)))))
+  (testing "a good post of a new demographic record"
+   (let [actual (app {:request-method :post
+                      :uri "/records"
+                      :body "lname fname female green 2014-03-22"
+                      :headers {:delimiter "space"}})
+         ;; _ (clojure.pprint/pprint actual)
+         ]
+     (is (= 201 (:status actual))))))
 
 (deftest post-fail-no-body
-  (let [actual (app {:request-method :post
-                     :uri "/records"
-                     ;; :body nil
-                     :headers {:delimiter "space"}})
-        ;; _ (clojure.pprint/pprint actual)
-        ]
-    (is (= (:status actual) 400))))
+  (testing "bad post - no body"
+   (let [actual (app {:request-method :post
+                      :uri "/records"
+                      ;; :body nil
+                      :headers {:delimiter "space"}})
+         ;; _ (clojure.pprint/pprint actual)
+         ]
+     (is (= (:status actual) 400)))))
 
 (deftest post-fail-no-headers
-  (let [actual (app {:request-method :post
-                     :uri "/records"
-                     :body "lname fname female green 2014-03-22"})]
-    (is (= (:status actual) 400))))
+  (testing "bad post - no headers"
+   (let [actual (app {:request-method :post
+                      :uri "/records"
+                      :body "lname fname female green 2014-03-22"})]
+     (is (= (:status actual) 400)))))
 
 (deftest post-fail-bad-body
-  (let [actual (app {:request-method :post
-                     :uri "/records"
-                     :body "what???"
-                     :headers {:delimiter "space"}})
-        ;; _ (clojure.pprint/pprint actual)
-        ;; _ (println (-> actual :body :spec-expound-str))
-        ;; _ (println (-> actual :body :spec-explain-str))
-        ]
-    (is (= (:status actual) 400))))
+  (testing "bad post - invalid body"
+   (let [actual (app {:request-method :post
+                        :uri "/records"
+                        :body "what???"
+                        :headers {:delimiter "space"}})
+           ;; _ (clojure.pprint/pprint actual)
+           ;; _ (println (-> actual :body :spec-expound-str))
+           ;; _ (println (-> actual :body :spec-explain-str))
+           ]
+       (is (= (:status actual) 400)))))
 
-(defn load-recs! []
+(defn load-recs!
+  "side effecting helper function for the get tests below"
+  []
   (letfn [(load-rec-helper! [line delim]
             (app {:request-method :post
                   :uri "/records"
@@ -54,36 +60,39 @@
   (json/read-str str-in :key-fn keyword))
 
 (deftest get-recs-sorted-by-name-success
-  (let [_ (load-recs!)
-        actual (app {:request-method :get
-                     :uri "/records/name"})
-        ;; _ (clojure.pprint/pprint actual)
-        ]
-    (let [result (-> actual :body to-json :result)]
-      (is (= 4 (count result)))
-      (let [first-one (first result)
-            last-one (last result)]
-        (is (= "lname1" (:last-name first-one)))
-        (is (= "fname1" (:first-name first-one)))
-        (is (= "lname4" (:last-name last-one)))
-        (is (= "fname4" (:first-name last-one)))))))
+  (testing "get success - sort by name"
+   (let [_ (load-recs!)
+         actual (app {:request-method :get
+                      :uri "/records/name"})
+         ;; _ (clojure.pprint/pprint actual)
+         ]
+     (let [result (-> actual :body to-json :result)]
+       (is (= 4 (count result)))
+       (let [first-one (first result)
+             last-one (last result)]
+         (is (= "lname1" (:last-name first-one)))
+         (is (= "fname1" (:first-name first-one)))
+         (is (= "lname4" (:last-name last-one)))
+         (is (= "fname4" (:first-name last-one))))))))
 
 (deftest get-recs-sorted-by-birthdate-success
-  (let [_ (load-recs!)
-        actual (app {:request-method :get
-                     :uri "/records/birthdate"})]
-    (let [result (-> actual :body to-json :result)]
-     (is (= 4 (count result)))
-     (let [first-one (first result)
-           last-one (last result)]
-       (is (= "1/18/1988" (:birthdate first-one)))
-       (is (= "3/9/2012" (:birthdate last-one)))))))
+  (testing "get success - sort by birthdate"
+   (let [_ (load-recs!)
+         actual (app {:request-method :get
+                      :uri "/records/birthdate"})]
+     (let [result (-> actual :body to-json :result)]
+       (is (= 4 (count result)))
+       (let [first-one (first result)
+             last-one (last result)]
+         (is (= "1/18/1988" (:birthdate first-one)))
+         (is (= "3/9/2012" (:birthdate last-one))))))))
 
 (deftest get-recs-sorted-by-gender-success
-  (let [_ (load-recs!)
-        actual (app {:request-method :get
-                     :uri "/records/gender"})]
-    (let [result (-> actual :body to-json :result)]
-     (is (= 4 (count result)))
-     (let [genders (mapv :gender result)]
-       (is (= ["f" "f" "m" "m"] genders))))))
+  (testing "get success - sort by gender"
+   (let [_ (load-recs!)
+         actual (app {:request-method :get
+                      :uri "/records/gender"})]
+     (let [result (-> actual :body to-json :result)]
+       (is (= 4 (count result)))
+       (let [genders (mapv :gender result)]
+         (is (= ["f" "f" "m" "m"] genders)))))))
