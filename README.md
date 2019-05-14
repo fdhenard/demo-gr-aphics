@@ -27,7 +27,8 @@ comma `', '` and space `' '` are the other [delimiter options](#delimiter-option
 ### Field formats and options
 
 - Gender options - `m`, `male`, `f`, `female`, `M`, `MALE`, `F`, `FEMALE`, `Male`, `Female`
-- FavoriteColor options - `red`, `orange`, `yellow`, `green`, `blue`, `indigo`, `violet`
+- FavoriteColor options - `red`, `maroon`, `pink`, `brown`, `orange`, `apricot`, `olive`, `yellow`, `beige`, `lime`, `green`, `mint`, `teal`, `cyan`, `navy`, `blue`, `indigo`, `purple`, `lavender`, `magenta`, `violet`, `black`, `white`, `grey`
+    - note: this list was taken from [here](https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/), and also added violet.  Tried to come up with a list of simple colors from which most people would choose
 - DateOfBirth - `YYYY-MM-DD`
 
 [Back to TOC](#table-of-contents)
