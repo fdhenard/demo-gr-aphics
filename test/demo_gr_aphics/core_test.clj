@@ -47,5 +47,4 @@
                 ;; _ (println (println (str "pred type: " (type (:pred problem)))))
                 ]
             (is (= (:path problem) [:birthdate]))
-            (is (= (:pred problem) 'demo-gr-aphics.core/will-coerce-to-local-date?)))))
-  )
+            (is (= (:pred problem) 'demo-gr-aphics.core/will-coerce-to-local-date?))))))
