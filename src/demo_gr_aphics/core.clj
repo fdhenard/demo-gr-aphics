@@ -46,14 +46,17 @@
                        ::non-blank-string
                        will-coerce-to-local-date?
                        is-date-lte-today?))
-(spec/def ::rainbow-colors #{"red"
-                             "orange"
-                             "yellow"
-                             "green"
-                             "blue"
-                             "indigo"
-                             "violet"})
-(spec/def ::favorite-color ::rainbow-colors)
+
+;; https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+;; + indigo
+(spec/def ::colors #{"red" "maroon" "pink"
+                     "brown" "orange" "apricot"
+                     "olive" "yellow" "beige"
+                     "lime" "green" "mint"
+                     "teal" "cyan" "navy" "blue"
+                     "indigo" "purple" "lavender" "magenta" "violet"
+                     "black" "white" "grey"})
+(spec/def ::favorite-color ::colors)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; finally the demographic record spec for incoming records (not canonical)
