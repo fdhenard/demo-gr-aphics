@@ -2,6 +2,16 @@
 
 Demographic record processing with [files](#file-processing) and a [web API](#web-api-processing).
 
+## Table of Contents
+
+- [Record Formatting](#record-formatting)
+- [File Processing](#file-processing)
+    - [Usage](#file-processing-usage)
+- [Web API Processing](#web-api-processing)
+    - [Usage](#web-api-usage)
+- [Assumptions](#assumptions)
+- [License](#license)
+
 ## Record Formatting
 
 A single record with pipe `' | '` delimited formatting:
@@ -19,6 +29,8 @@ comma `', '` and space `' '` are the other [delimiter options](#delimiter-option
 - Gender options - `m`, `male`, `f`, `female`, `M`, `MALE`, `F`, `FEMALE`, `Male`, `Female`
 - FavoriteColor options - `red`, `orange`, `yellow`, `green`, `blue`, `indigo`, `violet`
 - DateOfBirth - `YYYY-MM-DD`
+
+[Back to TOC](#table-of-contents)
 
 ## File Processing
 
@@ -40,6 +52,8 @@ The input file should be a list of the records with the format as indicated in [
 - pipe - `' | '`
 - comma - `', '`
 - space - `' '`
+
+[Back to TOC](#table-of-contents)
 
 ## Web API Processing
 
@@ -64,7 +78,9 @@ webserver can be accessed via `http://localhost:<port>`
 - `GET` request method to `/records/gender` to get the records in gender order in JSON formatting
 - `GET` request method to `/records/birthdate` - same as above sorted by Birthdate
 - `GET` request method to `/records/name` - same as above sorted by LastName, then FirstName
-  
+
+[Back to TOC](#table-of-contents)
+
 ## Assumptions
 
 - user has leiningen
@@ -75,6 +91,8 @@ webserver can be accessed via `http://localhost:<port>`
 - input date must coerce to `java-time/local-date` - recommend `YYYY-MM-DD`
 - webserver
     - no security concerns - not SSL, no authentication
+
+[Back to TOC](#table-of-contents)
 
 ## License
 
@@ -90,3 +108,5 @@ Public License, v. 2.0 are satisfied: GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or (at your
 option) any later version, with the GNU Classpath Exception which is available
 at https://www.gnu.org/software/classpath/license.html.
+
+[Back to TOC](#table-of-contents)
