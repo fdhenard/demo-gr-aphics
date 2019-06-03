@@ -1,15 +1,18 @@
 (ns demo-gr-aphics.web
-  (:require [clojure.walk :as walk]
+  (:require [clojure.pprint :as pp]
+            [clojure.walk :as walk]
             [clojure.string :as str]
             [clojure.spec.alpha :as spec]
             [mount.core :as mount]
             [reitit.ring :as ring]
             [reitit.coercion.spec]
             [expound.alpha :as expound]
+            [clj-http.client :as client]
             [ring.adapter.jetty :as jetty]
             [ring.util.request :as ring-util-req]
             [ring.middleware.json :as json-middleware]
             [demo-gr-aphics.core :as core]))
+
 
 (def demog-recs
   "runtime state (db) of all the demographic records added"
@@ -74,10 +77,31 @@
       (let [body-str (ring-util-req/body-string request)]
         (handler (assoc request :body body-str))))))
 
+
+(defn security-middleware [handler]
+  (fn [request]
+    (let [#_ (clojure.pprint/pprint request)
+          ;; token (-> request :headers :Authorization)
+          token (get-in request [:headers "authorization"])
+          _ (println (str "token = " token))
+          response (client/get
+                    "https://security.gr-dev.com/v101/user"
+                    #_{:query-params {:AuthenticationToken token
+                                    :Application "grdotcom"}}
+                    {:query-params {:AuthenticationToken token
+                                    :Application "Corporate"}
+                     :as :json}
+
+                    )
+          _ (pp/pprint {:response response})
+          ]
+      (handler request))))
+
 (defn wrap-base
   "some ring middleware"
   [handler]
   (-> handler
+      #_security-middleware
       json-middleware/wrap-json-response))
 
 (def router
