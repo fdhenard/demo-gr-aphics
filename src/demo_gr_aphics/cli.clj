@@ -1,10 +1,10 @@
 (ns demo-gr-aphics.cli
-  (:require [clojure.tools.cli :as cli]
-            [clojure.string :as str]
-            [demo-gr-aphics.core :as core]
+  (:require [clojure.string :as str]
+            [clojure.tools.cli :as cli]
             [mount.core :as mount]
             [demo-gr-aphics.web]
-            [demo-gr-aphics.file])
+            [demo-gr-aphics.file]
+            [demo-gr-aphics.core :as core])
   (:gen-class))
 
 (def port-default 3000)
@@ -61,7 +61,7 @@
       {:exit-message (usage summary)})))
 
 (defn -main [& args]
-  (let [{:keys [filepath delimiter webserver? port exit-message ok?]} (validate-args args)]
+  (let [{:keys [filepath delimiter webserver? port exit-message _ok?]} (validate-args args)]
     (cond
       exit-message
       (println exit-message)

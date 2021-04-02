@@ -1,17 +1,15 @@
 (ns demo-gr-aphics.web
-  (:require [mount.core :as mount]
-            [ring.adapter.jetty :as jetty]
-            [reitit.ring :as ring]
-            [ring.util.request :as ring-util-req]
-            [demo-gr-aphics.core :as core]
+  (:require [clojure.walk :as walk]
+            [clojure.string :as str]
             [clojure.spec.alpha :as spec]
-            [expound.alpha :as expound]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
-            [ring.middleware.json :as json-middleware]
+            [mount.core :as mount]
+            [reitit.ring :as ring]
             [reitit.coercion.spec]
-            [reitit.ring.coercion :as rrc]
-            [ring.middleware.defaults :as mw-defaults]
-            [clojure.string :as str]))
+            [expound.alpha :as expound]
+            [ring.adapter.jetty :as jetty]
+            [ring.util.request :as ring-util-req]
+            [ring.middleware.json :as json-middleware]
+            [demo-gr-aphics.core :as core]))
 
 (def demog-recs
   "runtime state (db) of all the demographic records added"
@@ -32,25 +30,24 @@
                                                        :post-demog-rec/headers]))
 
 (defn keywordize-headers [request]
-  (assoc request :headers (-> request :headers clojure.walk/keywordize-keys)))
+  (assoc request :headers (-> request :headers walk/keywordize-keys)))
 
 (defn post-demog-rec!
   "post function to add demographic record"
   [request]
   (let [request (keywordize-headers request)]
-    (if-let [explain-req (spec/explain-data ::post-demog-rec-request request)]
+    (if-not (spec/valid? ::post-demog-rec-request request)
       (let [message (expound/expound-str ::post-demog-rec-request request)
-            ;; _ (println message)
-            ]
+            #_ (println message)]
         {:status 400
          :body {:message message}})
-      (let [;; _ (clojure.pprint/pprint request)
+      (let [#_ (pprint/pprint request)
             delimiter-kw (keyword (get-in request [:headers :delimiter]))
-            ;; _ (println "delimiter-kw" )
+            #_ (println "delimiter-kw" )
             delimiter-re (get core/delimiter-regexes delimiter-kw)
             body (-> request ring-util-req/body-string str/trim)
-            xform-res (core/line->canonical-or-error-map body delimiter-re)]
-        (case (:type xform-res)
+            {:keys [type] :as xform-res} (core/line->canonical-or-error-map body delimiter-re)]
+        (case type
           :error
           {:status 400
            :body xform-res}
@@ -59,11 +56,11 @@
             (swap! demog-recs conj (dissoc xform-res :type))
             {:status 201
              :body {:success true}})
-          (throw (Exception. (str "programming error - unexpected type of '" (:type xform-res) "'"))))))))
+          (throw (ex-info (str "programming error - unexpected type") {:type type})))))))
 
 (defn get-demog-recs-sorted
   "a shared endpoint function for the GET endpoints and their corresponding sorting orders"
-  [sort-by-key-fn request]
+  [sort-by-key-fn _request]
   (let [sorted (sort-by sort-by-key-fn @demog-recs)]
     {:status 200
      :body {:result (map core/canonical->displayable sorted)}}))
@@ -71,10 +68,10 @@
 (defn wrap-body-string
   "convert the body to a string if it is not.  Does no transformation if the body is already a string which is helpful for automated testing of endpoints through the router"
   [handler]
-  (fn [request]
-    (if (string? (:body request))
+  (fn [{:keys [body] :as request}]
+    (if (string? body)
       (handler request)
-      (let [body-str (ring.util.request/body-string request)]
+      (let [body-str (ring-util-req/body-string request)]
         (handler (assoc request :body body-str))))))
 
 (defn wrap-base
