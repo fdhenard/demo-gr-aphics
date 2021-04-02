@@ -89,7 +89,7 @@
      ["/birthdate" {:get {:handler (partial get-demog-recs-sorted :birthdate)}}]
      ["/name" {:get {:handler (partial get-demog-recs-sorted (juxt :last-name :first-name))}}]]
     ["/ping" {:get {:handler (constantly {:status 200
-                                          :body "ok"
+                                          :body "pong"
                                           :headers {"Content-Type" "text/html"}})}}]]))
 
 (def app (wrap-base
