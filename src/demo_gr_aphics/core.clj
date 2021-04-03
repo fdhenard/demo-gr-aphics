@@ -1,7 +1,7 @@
 (ns demo-gr-aphics.core
   (:require [clojure.string :as str]
-            [java-time :as time]
             [clojure.spec.alpha :as spec]
+            [java-time :as time]
             [expound.alpha :as expound]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11,9 +11,8 @@
 
 (defn will-coerce-to-local-date? [x]
   (try
-    (do
-      (time/local-date x)
-      true)
+    (time/local-date x)
+    true
     (catch clojure.lang.ExceptionInfo ei
       (let [as-map (Throwable->map ei)
             cause-type (-> as-map :via (get 1) :type)]
@@ -99,7 +98,7 @@
 
 (defn canonical->displayable
   "transform a canonical demographic record to one that is displayable as is commonly needed for file processing and web processing"
-  [demog-rec]
-  (as-> demog-rec $
-    (dissoc $ :type)
-    (assoc $ :birthdate (time/format "M/d/YYYY" (:birthdate $)))))
+  [{:keys [birthdate] :as demog-rec}]
+  (-> demog-rec
+      (dissoc :type)
+      (assoc :birthdate (time/format "M/d/YYYY" birthdate))))

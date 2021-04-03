@@ -1,7 +1,9 @@
 (ns demo-gr-aphics.file
-  (:require [demo-gr-aphics.core :as core]
+  (:require [clojure.walk :as walk]
             [clojure.java.io :as io]
-            [clojure.pprint :as pprint]))
+            [clojure.string :as string]
+            [clojure.pprint :as pprint]
+            [demo-gr-aphics.core :as core]))
 
 (def gender->display {:m "Male"
                       :f "Female"})
@@ -18,12 +20,12 @@
 
 (defn canonical->displayable-for-file-processing
   "transform a canonical demographic record to the display desired for file processing output"
-  [demog-rec]
-  (as-> demog-rec $
-    (core/canonical->displayable $)
-    (dissoc $ :line-num)
-    (assoc $ :gender (get gender->display (:gender $)))
-    (clojure.walk/stringify-keys $)))
+  [{:keys [gender] :as demog-rec}]
+  (-> demog-rec
+      core/canonical->displayable
+      (dissoc :line-num)
+      (assoc :gender (get gender->display gender))
+      walk/stringify-keys))
 
 (defn get-display-sorted [canonical-demog-recs sort-fn]
   (let [sorted (sort-fn canonical-demog-recs)]
@@ -39,7 +41,7 @@
     (if (not (.exists file))
       (println (str "file './" filepath "' does not exist"))
       (let [file-as-str (slurp file)
-            lines (clojure.string/split file-as-str #"\n")
+            lines (string/split file-as-str #"\n")
             delimiter-regex (get core/delimiter-regexes (keyword delimiter-name))
             canonical-or-error-maps (lines->canonical-or-error-maps lines delimiter-regex)
             ;; _ (pprint/pprint canonical-or-error-maps)
@@ -60,6 +62,5 @@
             _ (println "\n\nOutput 3 - sorted by last name, descending")
             _ (pprint/print-table (get-display-sorted
                                    canonical-demog-recs
-                                   #(sort-by :last-name sort-reverse %)))
-            ]
+                                   #(sort-by :last-name sort-reverse %)))]
         nil))))
