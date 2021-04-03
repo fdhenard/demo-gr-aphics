@@ -80,7 +80,7 @@
 
 (defn security-middleware [handler]
   (fn [request]
-    (let [#_ (clojure.pprint/pprint request)
+    (let [#_ (pp/pprint request)
           ;; token (-> request :headers :Authorization)
           token (get-in request [:headers "authorization"])
           _ (println (str "token = " token))
@@ -90,11 +90,8 @@
                                     :Application "grdotcom"}}
                     {:query-params {:AuthenticationToken token
                                     :Application "Corporate"}
-                     :as :json}
-
-                    )
-          _ (pp/pprint {:response response})
-          ]
+                     :as :json})
+          _ (pp/pprint {:response response})]
       (handler request))))
 
 (defn wrap-base
