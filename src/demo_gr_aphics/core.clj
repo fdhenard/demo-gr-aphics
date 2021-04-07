@@ -23,14 +23,14 @@
 (defn is-date-lte-today? [x]
   (<= (compare (time/local-date x) (time/local-date)) 0))
 
-(spec/def ::non-blank-string (spec/and string? #(not (str/blank? %))))
-(spec/def ::last-name ::non-blank-string)
-(spec/def ::first-name ::non-blank-string)
-(def gender-options-map {"m" :m
+(spec/def ::NonBlankString (spec/and string? #(not (str/blank? %))))
+(spec/def ::last-name ::NonBlankString)
+(spec/def ::first-name ::NonBlankString)
+(def GENDER_OPTIONS_MAP {"m" :m
                          "male" :m
                          "f" :f
                          "female" :f})
-(def gender-options
+(def GENDER_OPTIONS
   "combinations of 'm', 'male', 'f', 'female', capitalized, uppercased, and not transformed"
   (set (reduce
         (fn [accum item]
@@ -38,37 +38,37 @@
                          (str/capitalize item)
                          (str/upper-case item)]))
         []
-        (keys gender-options-map))))
-(spec/def ::gender gender-options)
-(expound/defmsg ::gender (str "should be one of " gender-options))
+        (keys GENDER_OPTIONS_MAP))))
+(spec/def ::gender GENDER_OPTIONS)
+(expound/defmsg ::gender (str "should be one of " GENDER_OPTIONS))
 (spec/def ::birthdate (spec/and
-                       ::non-blank-string
+                       ::NonBlankString
                        will-coerce-to-local-date?
                        is-date-lte-today?))
 
 ;; https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
 ;; + indigo
-(spec/def ::colors #{"red" "maroon" "pink"
+(spec/def ::Color #{"red" "maroon" "pink"
                      "brown" "orange" "apricot"
                      "olive" "yellow" "beige"
                      "lime" "green" "mint"
                      "teal" "cyan" "navy" "blue"
                      "indigo" "purple" "lavender" "magenta" "violet"
                      "black" "white" "grey"})
-(spec/def ::favorite-color ::colors)
+(spec/def ::favorite-color ::Color)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; finally the demographic record spec for incoming records (not canonical)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::demographic-record (spec/keys :req-un [::last-name ::first-name ::gender ::favorite-color ::birthdate]))
+(spec/def ::DemographicRecord (spec/keys :req-un [::last-name ::first-name ::gender ::favorite-color ::birthdate]))
 
-(def pipe #"\ \|\ ")
-(def comma #",\ ")
-(def space #"\ ")
-(def delimiter-regexes {:pipe pipe
-                        :comma comma
-                        :space space})
-(def delimiter-choices (->> delimiter-regexes
+(def PIPE #"\ \|\ ")
+(def COMMA #",\ ")
+(def SPACE #"\ ")
+(def DELIMITER_REGEXES {:pipe PIPE
+                        :comma COMMA
+                        :space SPACE})
+(def DELIMITER_CHOICES (->> DELIMITER_REGEXES
                             keys
                             (map name)
                             set))
@@ -83,16 +83,16 @@
                             :gender gender
                             :favorite-color fav-color
                             :birthdate dob}]
-    (if-let [spec-explain-data (spec/explain-data ::demographic-record demographic-record)]
+    (if-let [spec-explain-data (spec/explain-data ::DemographicRecord demographic-record)]
       {:type :error
        :spec-explain-data spec-explain-data
-       :spec-explain-str (spec/explain-str ::demographic-record demographic-record)
-       :spec-expound-str (expound/expound-str ::demographic-record demographic-record)
+       :spec-explain-str (spec/explain-str ::DemographicRecord demographic-record)
+       :spec-expound-str (expound/expound-str ::DemographicRecord demographic-record)
        :line line}
       {:type :demog-rec
        :last-name lname
        :first-name fname
-       :gender (get gender-options-map (str/lower-case gender))
+       :gender (get GENDER_OPTIONS_MAP (str/lower-case gender))
        :favorite-color fav-color
        :birthdate (time/local-date dob)})))
 

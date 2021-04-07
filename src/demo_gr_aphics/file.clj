@@ -42,7 +42,7 @@
       (println (str "file './" filepath "' does not exist"))
       (let [file-as-str (slurp file)
             lines (string/split file-as-str #"\n")
-            delimiter-regex (get core/delimiter-regexes (keyword delimiter-name))
+            delimiter-regex (get core/DELIMITER_REGEXES (keyword delimiter-name))
             canonical-or-error-maps (lines->canonical-or-error-maps lines delimiter-regex)
             ;; _ (pprint/pprint canonical-or-error-maps)
             canonical-demog-recs (:demog-rec canonical-or-error-maps)
