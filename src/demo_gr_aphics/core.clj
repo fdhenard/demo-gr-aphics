@@ -26,21 +26,11 @@
 (spec/def ::NonBlankString (spec/and string? #(not (str/blank? %))))
 (spec/def ::last-name ::NonBlankString)
 (spec/def ::first-name ::NonBlankString)
-(def GENDER_OPTIONS_MAP {"m" :m
-                         "male" :m
-                         "f" :f
-                         "female" :f})
-(def GENDER_OPTIONS
-  "combinations of 'm', 'male', 'f', 'female', capitalized, uppercased, and not transformed"
-  (set (reduce
-        (fn [accum item]
-          (concat accum [item
-                         (str/capitalize item)
-                         (str/upper-case item)]))
-        []
-        (keys GENDER_OPTIONS_MAP))))
-(spec/def ::gender GENDER_OPTIONS)
-(expound/defmsg ::gender (str "should be one of " GENDER_OPTIONS))
+
+(def EMAIL_REGEX #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$")
+(spec/def ::Email (spec/and string? #(re-matches EMAIL_REGEX %)))
+(spec/def ::email ::Email)
+
 (spec/def ::birthdate (spec/and
                        ::NonBlankString
                        will-coerce-to-local-date?
@@ -60,7 +50,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; finally the demographic record spec for incoming records (not canonical)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::DemographicRecord (spec/keys :req-un [::last-name ::first-name ::gender ::favorite-color ::birthdate]))
+(spec/def ::DemographicRecord (spec/keys :req-un [::last-name
+                                                  ::first-name
+                                                  ::email
+                                                  ::favorite-color
+                                                  ::birthdate]))
 
 (def PIPE #"\ \|\ ")
 (def COMMA #",\ ")
@@ -77,10 +71,10 @@
 (defn line->canonical-or-error-map
   "transform a line to either the canonical demographic record or an error map"
   [line delimiter-re]
-  (let [[lname fname gender fav-color dob] (map str/trim (str/split line delimiter-re))
+  (let [[lname fname email fav-color dob] (map str/trim (str/split line delimiter-re))
         demographic-record {:last-name lname
                             :first-name fname
-                            :gender gender
+                            :email email
                             :favorite-color fav-color
                             :birthdate dob}]
     (if-let [spec-explain-data (spec/explain-data ::DemographicRecord demographic-record)]
@@ -92,7 +86,7 @@
       {:type :demog-rec
        :last-name lname
        :first-name fname
-       :gender (get GENDER_OPTIONS_MAP (str/lower-case gender))
+       :email email
        :favorite-color fav-color
        :birthdate (time/local-date dob)})))
 

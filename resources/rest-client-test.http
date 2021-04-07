@@ -3,42 +3,42 @@
 
 POST http://localhost:3000/records
 Delimiter: space
-fname1 lname1 m red 2010-01-01
+fname1 lname1 email@email.com red 2010-01-01
 
 # fails - multiple lines
 
 POST http://localhost:3000/records
 delimiter: space
-fname1 lname1 m red 2010-01-01
-fname2 lname2 f blue 2000-01-01
+fname1 lname1 test@test.com red 2010-01-01
+fname2 lname2 test@domain.com blue 2000-01-01
 
 # fails - bad birthdate
 
 POST http://localhost:3000/records
 delimiter: space
-fname2 lname2 f blue 2000-01-99
+fname2 lname2 email@example.com blue 2000-01-99
 
 # success 2
 
 POST http://localhost:3000/records
 Delimiter: pipe
-fname2 | lname2 | f | blue | 1960-10-04
+fname2 | lname2 | email@domain.com | blue | 1960-10-04
 
 # success 3
 
 POST http://localhost:3000/records
 Delimiter: comma
-fname3, lname3, m, indigo, 1986-05-19
+fname3, lname3, addr@host.com, indigo, 1986-05-19
 
 # success 4
 
 POST http://localhost:3000/records
 Delimiter: pipe
-fname4 | lname4 | f | green | 2015-11-25
+fname4 | lname4 | eml@addr.com | green | 2015-11-25
 
-# sorted by gender
+# sorted by email
 
-GET http://localhost:3000/records/gender
+GET http://localhost:3000/records/email
 
 # sorted by birthdate
 

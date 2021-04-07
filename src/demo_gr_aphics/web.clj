@@ -85,7 +85,7 @@
    [["/records"
      ["" {:post {:handler post-demog-rec!
                  :middleware [wrap-body-string]}}]
-     ["/gender" {:get {:handler (partial get-demog-recs-sorted :gender)}}]
+     ["/email" {:get {:handler (partial get-demog-recs-sorted :email)}}]
      ["/birthdate" {:get {:handler (partial get-demog-recs-sorted :birthdate)}}]
      ["/name" {:get {:handler (partial get-demog-recs-sorted (juxt :last-name :first-name))}}]]
     ["/ping" {:get {:handler (constantly {:status 200
