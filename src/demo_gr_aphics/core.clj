@@ -23,52 +23,46 @@
 (defn is-date-lte-today? [x]
   (<= (compare (time/local-date x) (time/local-date)) 0))
 
-(spec/def ::non-blank-string (spec/and string? #(not (str/blank? %))))
-(spec/def ::last-name ::non-blank-string)
-(spec/def ::first-name ::non-blank-string)
-(def gender-options-map {"m" :m
-                         "male" :m
-                         "f" :f
-                         "female" :f})
-(def gender-options
-  "combinations of 'm', 'male', 'f', 'female', capitalized, uppercased, and not transformed"
-  (set (reduce
-        (fn [accum item]
-          (concat accum [item
-                         (str/capitalize item)
-                         (str/upper-case item)]))
-        []
-        (keys gender-options-map))))
-(spec/def ::gender gender-options)
-(expound/defmsg ::gender (str "should be one of " gender-options))
+(spec/def ::NonBlankString (spec/and string? #(not (str/blank? %))))
+(spec/def ::last-name ::NonBlankString)
+(spec/def ::first-name ::NonBlankString)
+
+(def EMAIL_REGEX #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$")
+(spec/def ::Email (spec/and string? #(re-matches EMAIL_REGEX %)))
+(spec/def ::email ::Email)
+
 (spec/def ::birthdate (spec/and
-                       ::non-blank-string
+                       ::NonBlankString
                        will-coerce-to-local-date?
                        is-date-lte-today?))
 
 ;; https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
 ;; + indigo
-(spec/def ::colors #{"red" "maroon" "pink"
+(spec/def ::Color #{"red" "maroon" "pink"
                      "brown" "orange" "apricot"
                      "olive" "yellow" "beige"
                      "lime" "green" "mint"
                      "teal" "cyan" "navy" "blue"
                      "indigo" "purple" "lavender" "magenta" "violet"
                      "black" "white" "grey"})
-(spec/def ::favorite-color ::colors)
+(spec/def ::favorite-color ::Color)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; finally the demographic record spec for incoming records (not canonical)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(spec/def ::demographic-record (spec/keys :req-un [::last-name ::first-name ::gender ::favorite-color ::birthdate]))
+(spec/def ::DemographicRecord (spec/keys :req-un [::last-name
+                                                  ::first-name
+                                                  ::email
+                                                  ::favorite-color
+                                                  ::birthdate]))
 
-(def pipe #"\ \|\ ")
-(def comma #",\ ")
-(def space #"\ ")
-(def delimiter-regexes {:pipe pipe
-                        :comma comma
-                        :space space})
-(def delimiter-choices (->> delimiter-regexes
+(def PIPE #"\ \|\ ")
+(def COMMA #",\ ")
+(def SPACE #"\ ")
+(def DELIMITER_REGEXES {:pipe PIPE
+                        :comma COMMA
+                        :space SPACE})
+(def DELIMITER_CHOICES (->> DELIMITER_REGEXES
                             keys
                             (map name)
                             set))
@@ -77,22 +71,22 @@
 (defn line->canonical-or-error-map
   "transform a line to either the canonical demographic record or an error map"
   [line delimiter-re]
-  (let [[lname fname gender fav-color dob] (map str/trim (str/split line delimiter-re))
+  (let [[lname fname email fav-color dob] (map str/trim (str/split line delimiter-re))
         demographic-record {:last-name lname
                             :first-name fname
-                            :gender gender
+                            :email email
                             :favorite-color fav-color
                             :birthdate dob}]
-    (if-let [spec-explain-data (spec/explain-data ::demographic-record demographic-record)]
+    (if-let [spec-explain-data (spec/explain-data ::DemographicRecord demographic-record)]
       {:type :error
        :spec-explain-data spec-explain-data
-       :spec-explain-str (spec/explain-str ::demographic-record demographic-record)
-       :spec-expound-str (expound/expound-str ::demographic-record demographic-record)
+       :spec-explain-str (spec/explain-str ::DemographicRecord demographic-record)
+       :spec-expound-str (expound/expound-str ::DemographicRecord demographic-record)
        :line line}
       {:type :demog-rec
        :last-name lname
        :first-name fname
-       :gender (get gender-options-map (str/lower-case gender))
+       :email email
        :favorite-color fav-color
        :birthdate (time/local-date dob)})))
 

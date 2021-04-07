@@ -7,11 +7,11 @@
             [demo-gr-aphics.core :as core])
   (:gen-class))
 
-(def port-default 3000)
+(def PORT_DEFAULT 3000)
 
-(def cli-options
-  [["-p" "--port PORT" (str "Port Number (default " port-default ")")
-    :default port-default
+(def CLI_OPTIONS
+  [["-p" "--port PORT" (str "Port Number (default " PORT_DEFAULT ")")
+    :default PORT_DEFAULT
     :parse-fn #(Integer/parseInt %)
     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]])
 
@@ -46,13 +46,13 @@
        (str/join \newline errors)))
 
 (defn validate-args [args]
-  (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]
+  (let [{:keys [options arguments errors summary]} (cli/parse-opts args CLI_OPTIONS)]
     (cond
       errors ; errors => exit with description of errors
       {:exit-message (error-msg errors)}
       ;; custom validation on arguments
       (and (= 2 (count arguments))
-           (core/delimiter-choices (nth arguments 1)))
+           (core/DELIMITER_CHOICES (nth arguments 1)))
       {:filepath (first arguments) :delimiter (nth arguments 1)}
       (and (= 1 (count arguments))
            (= "webserver" (nth arguments 0)))

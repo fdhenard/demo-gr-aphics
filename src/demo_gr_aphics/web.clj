@@ -22,8 +22,8 @@
 (spec/def ::single-line? #(not (.contains (str/trim %) "\n")))
 (expound/defmsg ::single-line? "return characters not allowed in body for this endpoint")
 (spec/def :post-demog-rec/body (spec/and string? ::single-line?))
-(spec/def :post-demog-rec/delimiter (spec/and string? core/delimiter-choices))
-(expound/defmsg :post-demog-rec/delimiter (str "should be one of " core/delimiter-choices))
+(spec/def :post-demog-rec/delimiter (spec/and string? core/DELIMITER_CHOICES))
+(expound/defmsg :post-demog-rec/delimiter (str "should be one of " core/DELIMITER_CHOICES))
 (spec/def :post-demog-rec/headers (spec/keys :req-un [:post-demog-rec/delimiter]))
 
 (spec/def ::post-demog-rec-request (spec/keys :req-un [:post-demog-rec/body
@@ -44,7 +44,7 @@
       (let [#_ (pprint/pprint request)
             delimiter-kw (keyword (get-in request [:headers :delimiter]))
             #_ (println "delimiter-kw" )
-            delimiter-re (get core/delimiter-regexes delimiter-kw)
+            delimiter-re (get core/DELIMITER_REGEXES delimiter-kw)
             body (-> request ring-util-req/body-string str/trim)
             {:keys [type] :as xform-res} (core/line->canonical-or-error-map body delimiter-re)]
         (case type
@@ -85,7 +85,7 @@
    [["/records"
      ["" {:post {:handler post-demog-rec!
                  :middleware [wrap-body-string]}}]
-     ["/gender" {:get {:handler (partial get-demog-recs-sorted :gender)}}]
+     ["/email" {:get {:handler (partial get-demog-recs-sorted :email)}}]
      ["/birthdate" {:get {:handler (partial get-demog-recs-sorted :birthdate)}}]
      ["/name" {:get {:handler (partial get-demog-recs-sorted (juxt :last-name :first-name))}}]]
     ["/ping" {:get {:handler (constantly {:status 200

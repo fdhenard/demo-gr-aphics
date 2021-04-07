@@ -1,7 +1,10 @@
-lname1 | fname1 | male | green | 2019-01-01
-lname2 | fname2 | female | blue | 2018-06-30
-lname3 | lname3 | male | red | 2016-01-01
-lname4 | fname4 | f | indigo | 2012-02-04
+lname1 | fname1 | addr1@domain1.com | green | 2019-01-01
+lname2 | fname2 | addr2@domain2.com | blue | 2018-06-30
+lname3 | lname3 | addr3@domain3.com | red | 2016-01-01
+lname4 | fname4 | addr4@domain4.com | indigo | 2012-02-04
 
-lname5 |  | m | violet | 2020-01-01
-lname6 | fname6 | f | red  | 2019-02-02  
+lname5 |  | addr5@domain5.com | violet | 2020-01-01
+lname6 | fname6 | addr6@domain6.com | red  | 2019-02-02
+
+lname7 | fname7 | same@email.com | indigo | 2021-04-07
+lname8 | fname8 | same@email.com | green | 2020-02-02
